@@ -121,6 +121,173 @@
 //   );
 // }
 
+// import { useState } from "react";
+// import { supabase } from "../supabase";
+// import { useNavigate } from "react-router-dom";
+
+// export default function Attendance() {
+//   const [last5, setLast5] = useState("");
+//   const [message, setMessage] = useState("");
+//   const [status, setStatus] = useState(null);
+//   const [loading, setLoading] = useState(false);
+//   const navigate = useNavigate();
+
+//   function getStatus(expiryDate) {
+//     const today = new Date();
+//     const exp = new Date(expiryDate);
+//     const diff = Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
+
+//     if (diff < 0) return "EXPIRED";
+//     if (diff <= 2) return "DUE";
+//     return "ACTIVE";
+//   }
+
+//   async function handleSubmit(e) {
+//     e.preventDefault();
+
+//     if (last5.length !== 5) {
+//       setStatus("INVALID");
+//       setMessage("Enter last 5 digits");
+//       return;
+//     }
+
+//     setLoading(true);
+//     setMessage("");
+
+//     const { data: members } = await supabase.from("members").select("*");
+
+//     const member = members?.find((m) => m.phone.slice(-5) === last5);
+
+//     if (!member) {
+//       setStatus("INVALID");
+//       setMessage("Member not found");
+//       setLoading(false);
+//       return;
+//     }
+
+//     const currentStatus = getStatus(member.expiry_date);
+//     setStatus(currentStatus);
+
+//     if (currentStatus === "EXPIRED") {
+//       setMessage("Membership expired");
+//       setLoading(false);
+//       return;
+//     }
+
+//     const { error } = await supabase.from("attendance").insert({
+//       member_id: member.id,
+//       attendance_date: new Date().toISOString().split("T")[0],
+//       attendance_time: new Date().toTimeString().split(" ")[0],
+//     });
+
+//     if (error) {
+//       setStatus("DUE");
+//       setMessage("Attendance already marked today");
+//       setLoading(false);
+//       return;
+//     }
+
+//     setMessage("Attendance marked successfully");
+//     setLast5("");
+//     setLoading(false);
+//   }
+
+//   return (
+//     <div className="relative min-h-screen bg-gray-100 flex items-center justify-center px-4">
+//       <div className="absolute top-6 right-6">
+//         <button
+//           onClick={() => navigate("/admin")}
+//           className="px-5 py-2 rounded-xl bg-gray-900 text-white font-semibold"
+//         >
+//           Admin
+//         </button>
+//       </div>
+
+//       <div
+//         className="
+//         w-full 
+//         max-w-md 
+//         md:max-w-lg 
+//         bg-white 
+//         rounded-3xl 
+//         p-10 
+//         md:p-14
+//         shadow-2xl 
+//         text-center
+//       "
+//       >
+//         <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-10">
+//           Gym Attendance
+//         </h1>
+
+//         <form onSubmit={handleSubmit} className="space-y-8">
+//           <input
+//             type="password"
+//             inputMode="numeric"
+//             maxLength={5}
+//             placeholder="Last 5 Digits"
+//             value={last5}
+//             onChange={(e) => setLast5(e.target.value)}
+//             className="
+//               w-full 
+//               text-center 
+//               text-3xl 
+//               md:text-4xl
+//               tracking-widest 
+//               px-6 
+//               py-6 
+//               rounded-2xl 
+//               border-2 
+//               border-gray-300
+//               focus:border-red-500
+//               focus:ring-4 
+//               focus:ring-red-200
+//               outline-none
+//               text-gray-900
+//             "
+//           />
+
+//           <button
+//             disabled={loading}
+//             className="
+//               w-full 
+//               py-6 
+//               bg-red-600 
+//               hover:bg-red-700 
+//               rounded-2xl 
+//               text-white 
+//               font-extrabold 
+//               text-2xl 
+//               md:text-3xl
+//               active:scale-95 
+//               transition
+//             "
+//           >
+//             {loading ? "Checking..." : "Mark Attendance"}
+//           </button>
+//         </form>
+
+//         {message && (
+//           <div
+//             className={`
+//             mt-8 
+//             text-xl 
+//             md:text-2xl 
+//             font-bold
+//             ${status === "ACTIVE" && "text-green-600"}
+//             ${status === "DUE" && "text-orange-500"}
+//             ${status === "EXPIRED" && "text-red-600"}
+//             ${status === "INVALID" && "text-red-600"}
+//           `}
+//           >
+//             {message}
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   );
+// }
+
 import { useState } from "react";
 import { supabase } from "../supabase";
 import { useNavigate } from "react-router-dom";
@@ -153,19 +320,62 @@ export default function Attendance() {
 
     setLoading(true);
     setMessage("");
+    setStatus(null);
 
-    const { data: members } = await supabase.from("members").select("*");
+    /* ================= SINGLE MEMBERS ================= */
+    const { data: singles } = await supabase
+      .from("members")
+      .select("id, full_name, phone, expiry_date, plan_name");
 
-    const member = members?.find((m) => m.phone.slice(-5) === last5);
+    let person = singles?.find(
+      (m) => m.phone?.slice(-5) === last5
+    );
 
-    if (!member) {
+    let expiryDate = null;
+    let planName = null;
+
+    /* ================= GROUP PRIMARY MEMBERS ================= */
+    if (!person) {
+      const { data: groupPrimary } = await supabase
+        .from("group_members")
+        .select(`
+          id,
+          full_name,
+          phone,
+          is_primary,
+          membership_groups (
+            expiry_date,
+            plan_name
+          )
+        `)
+        .eq("is_primary", true);
+
+      const gp = groupPrimary?.find(
+        (g) => g.phone?.slice(-5) === last5
+      );
+
+      if (gp) {
+        person = gp;
+        expiryDate = gp.membership_groups.expiry_date;
+        planName = gp.membership_groups.plan_name;
+      }
+    }
+
+    /* ================= VALIDATION ================= */
+    if (!person) {
       setStatus("INVALID");
       setMessage("Member not found");
       setLoading(false);
       return;
     }
 
-    const currentStatus = getStatus(member.expiry_date);
+    // single member
+    if (!expiryDate) {
+      expiryDate = person.expiry_date;
+      planName = person.plan_name;
+    }
+
+    const currentStatus = getStatus(expiryDate);
     setStatus(currentStatus);
 
     if (currentStatus === "EXPIRED") {
@@ -174,10 +384,14 @@ export default function Attendance() {
       return;
     }
 
+    /* ================= ATTENDANCE INSERT ================= */
+    const todayDate = new Date().toISOString().split("T")[0];
+
     const { error } = await supabase.from("attendance").insert({
-      member_id: member.id,
-      attendance_date: new Date().toISOString().split("T")[0],
+      member_id: person.id, // works for both single & group primary
+      attendance_date: todayDate,
       attendance_time: new Date().toTimeString().split(" ")[0],
+      plan_name: planName,
     });
 
     if (error) {
@@ -187,7 +401,9 @@ export default function Attendance() {
       return;
     }
 
-    setMessage("Attendance marked successfully");
+    setMessage(
+      `Attendance marked successfully for ${person.full_name}`
+    );
     setLast5("");
     setLoading(false);
   }
@@ -203,19 +419,7 @@ export default function Attendance() {
         </button>
       </div>
 
-      <div
-        className="
-        w-full 
-        max-w-md 
-        md:max-w-lg 
-        bg-white 
-        rounded-3xl 
-        p-10 
-        md:p-14
-        shadow-2xl 
-        text-center
-      "
-      >
+      <div className="w-full max-w-md md:max-w-lg bg-white rounded-3xl p-10 md:p-14 shadow-2xl text-center">
         <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-10">
           Gym Attendance
         </h1>
@@ -228,40 +432,12 @@ export default function Attendance() {
             placeholder="Last 5 Digits"
             value={last5}
             onChange={(e) => setLast5(e.target.value)}
-            className="
-              w-full 
-              text-center 
-              text-3xl 
-              md:text-4xl
-              tracking-widest 
-              px-6 
-              py-6 
-              rounded-2xl 
-              border-2 
-              border-gray-300
-              focus:border-red-500
-              focus:ring-4 
-              focus:ring-red-200
-              outline-none
-              text-gray-900
-            "
+            className="w-full text-center text-3xl md:text-4xl tracking-widest px-6 py-6 rounded-2xl border-2 border-gray-300 focus:border-red-500 focus:ring-4 focus:ring-red-200 outline-none text-gray-900"
           />
 
           <button
             disabled={loading}
-            className="
-              w-full 
-              py-6 
-              bg-red-600 
-              hover:bg-red-700 
-              rounded-2xl 
-              text-white 
-              font-extrabold 
-              text-2xl 
-              md:text-3xl
-              active:scale-95 
-              transition
-            "
+            className="w-full py-6 bg-red-600 hover:bg-red-700 rounded-2xl text-white font-extrabold text-2xl md:text-3xl active:scale-95 transition"
           >
             {loading ? "Checking..." : "Mark Attendance"}
           </button>
@@ -269,16 +445,12 @@ export default function Attendance() {
 
         {message && (
           <div
-            className={`
-            mt-8 
-            text-xl 
-            md:text-2xl 
-            font-bold
-            ${status === "ACTIVE" && "text-green-600"}
-            ${status === "DUE" && "text-orange-500"}
-            ${status === "EXPIRED" && "text-red-600"}
-            ${status === "INVALID" && "text-red-600"}
-          `}
+            className={`mt-8 text-xl md:text-2xl font-bold
+              ${status === "ACTIVE" && "text-green-600"}
+              ${status === "DUE" && "text-orange-500"}
+              ${status === "EXPIRED" && "text-red-600"}
+              ${status === "INVALID" && "text-red-600"}
+            `}
           >
             {message}
           </div>
