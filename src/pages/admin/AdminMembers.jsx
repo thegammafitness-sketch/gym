@@ -357,7 +357,6 @@
 //   );
 // }
 
-
 import { useEffect, useState } from "react";
 import { supabase } from "../../supabase";
 
@@ -386,7 +385,8 @@ export default function AdminMembers() {
 
     const { data: groups } = await supabase
       .from("membership_groups")
-      .select(`
+      .select(
+        `
         id,
         plan_id,
         plan_name,
@@ -399,7 +399,8 @@ export default function AdminMembers() {
           photo_url,
           is_primary
         )
-      `)
+      `,
+      )
       .order("created_at", { ascending: false });
 
     const { data: plans } = await supabase.from("plans").select("*");
@@ -438,21 +439,29 @@ export default function AdminMembers() {
     const plan = plans.find((p) => p.id === selectedPlanId);
     if (!plan) return alert("Select a plan");
 
-    const today = new Date();
-    const start = today.toISOString().split("T")[0];
-    const expiry = new Date();
-    expiry.setDate(today.getDate() + plan.duration_days);
-    const expiryDate = expiry.toISOString().split("T")[0];
+    // normalize to local date (midnight)
+    const startDateObj = new Date();
+    startDateObj.setHours(0, 0, 0, 0);
+
+    // calculate expiry from start date ONLY
+    const expiryDateObj = new Date(startDateObj);
+    expiryDateObj.setDate(expiryDateObj.getDate() + plan.duration_days);
+
+    const start = startDateObj.toLocaleDateString("en-CA"); // YYYY-MM-DD
+    const expiryDate = expiryDateObj.toLocaleDateString("en-CA");
 
     if (renewTarget.type === "single") {
       const m = renewTarget.data;
 
-      await supabase.from("members").update({
-        plan_id: plan.id,
-        plan_name: plan.name,
-        start_date: start,
-        expiry_date: expiryDate,
-      }).eq("id", m.id);
+      await supabase
+        .from("members")
+        .update({
+          plan_id: plan.id,
+          plan_name: plan.name,
+          start_date: start,
+          expiry_date: expiryDate,
+        })
+        .eq("id", m.id);
 
       await supabase.from("payments").insert({
         source_type: "single_renew",
@@ -469,12 +478,15 @@ export default function AdminMembers() {
     if (renewTarget.type === "group") {
       const g = renewTarget.data;
 
-      await supabase.from("membership_groups").update({
-        plan_id: plan.id,
-        plan_name: plan.name,
-        start_date: start,
-        expiry_date: expiryDate,
-      }).eq("id", g.id);
+      await supabase
+        .from("membership_groups")
+        .update({
+          plan_id: plan.id,
+          plan_name: plan.name,
+          start_date: start,
+          expiry_date: expiryDate,
+        })
+        .eq("id", g.id);
 
       await supabase.from("payments").insert({
         source_type: "group_renew",
@@ -550,7 +562,10 @@ export default function AdminMembers() {
           <div key={m.id} className="border p-4 mb-3">
             <div className="flex gap-3 items-center">
               <img
-                src={m.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(m.full_name)}`}
+                src={
+                  m.photo_url ||
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(m.full_name)}`
+                }
                 className="w-10 h-10 rounded-full"
               />
 
@@ -565,7 +580,9 @@ export default function AdminMembers() {
                 </div>
               </div>
 
-              <span className={`px-2 py-1 text-xs rounded text-white ${statusBadge(status)}`}>
+              <span
+                className={`px-2 py-1 text-xs rounded text-white ${statusBadge(status)}`}
+              >
                 {status.toUpperCase()}
               </span>
 
@@ -611,7 +628,9 @@ export default function AdminMembers() {
           <div key={g.id} className="border p-4 mb-4">
             <div className="flex justify-between items-center">
               <b>{g.plan_name}</b>
-              <span className={`px-2 py-1 text-xs rounded text-white ${statusBadge(status)}`}>
+              <span
+                className={`px-2 py-1 text-xs rounded text-white ${statusBadge(status)}`}
+              >
                 {status.toUpperCase()}
               </span>
             </div>
@@ -625,7 +644,10 @@ export default function AdminMembers() {
             {g.group_members.map((m) => (
               <div key={m.id} className="flex gap-3 items-center mt-2">
                 <img
-                  src={m.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(m.full_name)}`}
+                  src={
+                    m.photo_url ||
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(m.full_name)}`
+                  }
                   className="w-8 h-8 rounded-full"
                 />
                 <span className="flex-1">
@@ -719,10 +741,16 @@ export default function AdminMembers() {
             />
 
             <div className="flex gap-2">
-              <button onClick={saveEdit} className="flex-1 bg-indigo-600 text-white py-2 rounded">
+              <button
+                onClick={saveEdit}
+                className="flex-1 bg-indigo-600 text-white py-2 rounded"
+              >
                 Save
               </button>
-              <button onClick={() => setEditingMember(null)} className="flex-1 bg-gray-300 py-2 rounded">
+              <button
+                onClick={() => setEditingMember(null)}
+                className="flex-1 bg-gray-300 py-2 rounded"
+              >
                 Cancel
               </button>
             </div>

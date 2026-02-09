@@ -208,3 +208,165 @@ function AttendanceHistoryModal({ person, onClose }) {
     </div>
   );
 }
+
+// import { useEffect, useState } from "react";
+// import { supabase } from "../../supabase";
+// // import AttendanceCalendar from "../../components/AttendanceCalendar";
+// import AttendanceCalendar from "../AttendanceCalendar";
+
+// export default function AdminAttendance() {
+//   const [members, setMembers] = useState([]);
+//   const [selected, setSelected] = useState(null);
+//   const [attendanceDates, setAttendanceDates] = useState([]);
+
+//   useEffect(() => {
+//     fetchMembers();
+//   }, []);
+
+//   async function fetchMembers() {
+//     const { data: singles } = await supabase
+//       .from("members")
+//       .select("id, full_name, phone");
+
+//     const { data: groups } = await supabase
+//       .from("group_members")
+//       .select("id, full_name, phone")
+//       .eq("is_primary", true);
+
+//     setMembers([...(singles || []), ...(groups || [])]);
+//   }
+
+//   async function loadAttendance(member) {
+//     setSelected(member);
+
+//     const start = new Date();
+//     start.setMonth(start.getMonth() - 1);
+
+//     const { data } = await supabase
+//       .from("attendance")
+//       .select("attendance_date")
+//       .eq("member_id", member.id)
+//       .gte("attendance_date", start.toISOString());
+
+//     setAttendanceDates(
+//       (data || []).map((d) => d.attendance_date)
+//     );
+//   }
+
+//   return (
+//     <div className="p-8">
+//       <h1 className="text-2xl font-bold mb-6">Attendance</h1>
+
+//       <div className="grid md:grid-cols-3 gap-4">
+//         {members.map((m) => (
+//           <div
+//             key={m.id}
+//             className="border p-4 rounded cursor-pointer hover:bg-gray-50"
+//             onClick={() => loadAttendance(m)}
+//           >
+//             <b>{m.full_name}</b>
+//             <div className="text-sm">{m.phone}</div>
+//           </div>
+//         ))}
+//       </div>
+
+//       {selected && (
+//         <div className="mt-8">
+//           <h2 className="font-semibold mb-2">
+//             Attendance – {selected.full_name}
+//           </h2>
+//           <AttendanceCalendar attendanceDates={attendanceDates} />
+//         </div>
+//       )}
+//     </div>
+//   );
+// }
+
+// import { useEffect, useState } from "react";
+// import { supabase } from "../../supabase";
+// import Calendar from "react-calendar";
+// import "react-calendar/dist/Calendar.css";
+
+// function formatLocalDate(date) {
+//   const y = date.getFullYear();
+//   const m = String(date.getMonth() + 1).padStart(2, "0");
+//   const d = String(date.getDate()).padStart(2, "0");
+//   return `${y}-${m}-${d}`;
+// }
+
+// export default function AdminAttendance() {
+//   const [people, setPeople] = useState([]);
+//   const [selected, setSelected] = useState(null);
+//   const [dates, setDates] = useState([]);
+
+//   useEffect(() => {
+//     loadPeople();
+//   }, []);
+
+//   async function loadPeople() {
+//     const { data: singles } = await supabase
+//       .from("members")
+//       .select("id, full_name, phone");
+
+//     const { data: groups } = await supabase
+//       .from("group_members")
+//       .select("id, full_name, phone")
+//       .eq("is_primary", true);
+
+//     setPeople([...(singles || []), ...(groups || [])]);
+//   }
+
+//   async function loadAttendance(p) {
+//     setSelected(p);
+
+//     const start = new Date();
+//     start.setMonth(start.getMonth() - 1);
+
+//     const { data } = await supabase
+//       .from("attendance")
+//       .select("attendance_date")
+//       .eq("member_id", p.id)
+//       .gte("attendance_date", start.toISOString());
+
+//     setDates(data.map((d) => d.attendance_date));
+//   }
+
+//   function tileClassName({ date, view }) {
+//     if (view !== "month") return null;
+
+//     const today = new Date();
+//     const d = formatLocalDate(date);
+
+//     if (date > today) return "bg-gray-300";
+//     if (dates.includes(d)) return "bg-green-500 text-white rounded-full";
+//     return "bg-red-500 text-white rounded-full";
+//   }
+
+//   return (
+//     <div className="p-8">
+//       <h1 className="text-2xl font-bold mb-6">Attendance Dashboard</h1>
+
+//       <div className="grid md:grid-cols-3 gap-4">
+//         {people.map((p) => (
+//           <div
+//             key={p.id}
+//             onClick={() => loadAttendance(p)}
+//             className="border p-4 rounded cursor-pointer hover:bg-gray-100"
+//           >
+//             <b>{p.full_name}</b>
+//             <div className="text-sm">{p.phone}</div>
+//           </div>
+//         ))}
+//       </div>
+
+//       {selected && (
+//         <div className="mt-8 max-w-md">
+//           <h2 className="font-semibold mb-2">
+//             Attendance – {selected.full_name}
+//           </h2>
+//           <Calendar tileClassName={tileClassName} />
+//         </div>
+//       )}
+//     </div>
+//   );
+// }
