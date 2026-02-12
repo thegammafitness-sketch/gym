@@ -216,19 +216,29 @@ export default function AdminPlans() {
   }
 
   return (
-    <div className="p-8 min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
-      <h1 className="text-3xl font-bold mb-6">Plans & Packs</h1>
+  <div className="p-10 min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 animate-fadeIn">
 
-      {/* ADD / EDIT PLAN */}
-      <form
-        onSubmit={savePlan}
-        className="bg-white/70 backdrop-blur border rounded-2xl p-6 mb-8 grid grid-cols-1 md:grid-cols-4 gap-4"
-      >
+    {/* HEADER */}
+    <div className="flex justify-between items-center mb-10">
+      <h1 className="text-4xl font-bold tracking-tight">Plans & Packs</h1>
+    </div>
+
+    {/* ADD / EDIT FORM */}
+    <form
+      onSubmit={savePlan}
+      className="bg-white shadow-xl rounded-3xl p-8 mb-12 border"
+    >
+      <h2 className="text-xl font-semibold mb-6">
+        {editingId ? "Update Plan" : "Create New Plan"}
+      </h2>
+
+      <div className="grid md:grid-cols-4 gap-6">
+
         <input
           placeholder="Plan Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="px-4 py-3 rounded-xl border"
+          className="px-4 py-3 rounded-xl border focus:ring-2 focus:ring-indigo-500 outline-none"
           required
         />
 
@@ -237,7 +247,7 @@ export default function AdminPlans() {
           placeholder="Duration (days)"
           value={duration}
           onChange={(e) => setDuration(e.target.value)}
-          className="px-4 py-3 rounded-xl border"
+          className="px-4 py-3 rounded-xl border focus:ring-2 focus:ring-indigo-500 outline-none"
           required
         />
 
@@ -246,7 +256,7 @@ export default function AdminPlans() {
           placeholder="Price (₹)"
           value={price}
           onChange={(e) => setPrice(e.target.value)}
-          className="px-4 py-3 rounded-xl border"
+          className="px-4 py-3 rounded-xl border focus:ring-2 focus:ring-indigo-500 outline-none"
           required
         />
 
@@ -256,75 +266,94 @@ export default function AdminPlans() {
           placeholder="No. of Members"
           value={maxMembers}
           onChange={(e) => setMaxMembers(e.target.value)}
-          className="px-4 py-3 rounded-xl border"
+          className="px-4 py-3 rounded-xl border focus:ring-2 focus:ring-indigo-500 outline-none"
           required
         />
-
-        <button
-          disabled={loading}
-          className="md:col-span-4 py-3 rounded-xl bg-indigo-600 text-white font-semibold"
-        >
-          {loading ? "Saving..." : editingId ? "Update Plan" : "Add Plan"}
-        </button>
-      </form>
-
-      {/* PLANS TABLE */}
-      <div className="bg-white/70 backdrop-blur border rounded-2xl shadow overflow-x-auto">
-        <table className="w-full text-left">
-          <thead className="bg-slate-100">
-            <tr>
-              <th className="p-4">Name</th>
-              <th className="p-4">Duration</th>
-              <th className="p-4">Price</th>
-              <th className="p-4">Type</th>
-              <th className="p-4">Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {plans.map((p) => (
-              <tr key={p.id} className="border-t">
-                <td className="p-4 font-medium">{p.name}</td>
-                <td className="p-4">{p.duration_days} days</td>
-                <td className="p-4">₹ {p.price}</td>
-                <td className="p-4">
-                  {p.max_members === 1
-                    ? "Single"
-                    : p.max_members === 2
-                      ? "Couple"
-                      : `Buddy (${p.max_members})`}
-                </td>
-                <td className="p-4 flex gap-2">
-                  <button
-                    onClick={() => {
-                      setEditingId(p.id);
-                      setName(p.name);
-                      setDuration(p.duration_days);
-                      setPrice(p.price);
-                      setMaxMembers(p.max_members);
-                      window.scrollTo({ top: 0, behavior: "smooth" });
-                    }}
-                    className="px-3 py-1 rounded-lg bg-amber-500 text-white text-sm"
-                  >
-                    Edit
-                  </button>
-
-                  <button
-                    onClick={() => deletePlan(p.id)}
-                    className="px-3 py-1 rounded-lg bg-rose-600 text-white text-sm"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {plans.length === 0 && (
-          <p className="p-6 text-center text-gray-500">No plans added yet</p>
-        )}
       </div>
+
+      <button
+        disabled={loading}
+        className="mt-8 w-full py-3 rounded-xl bg-indigo-600 text-white font-semibold hover:scale-[1.02] transition"
+      >
+        {loading ? "Saving..." : editingId ? "Update Plan" : "Add Plan"}
+      </button>
+    </form>
+
+    {/* PLAN CARDS */}
+    <div className="grid md:grid-cols-3 gap-8">
+
+      {plans.map((p) => {
+        const typeLabel =
+          p.max_members === 1
+            ? "Single"
+            : p.max_members === 2
+            ? "Couple"
+            : `Buddy (${p.max_members})`;
+
+        const gradient =
+          p.max_members === 1
+            ? "from-emerald-500 to-green-600"
+            : p.max_members === 2
+            ? "from-blue-500 to-indigo-600"
+            : "from-purple-500 to-pink-600";
+
+        return (
+          <div
+            key={p.id}
+            className="relative bg-white rounded-3xl shadow-xl p-8 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
+          >
+            {/* Top Gradient Strip */}
+            <div className={`absolute top-0 left-0 w-full h-2 bg-gradient-to-r ${gradient} rounded-t-3xl`} />
+
+            {/* Plan Name */}
+            <h3 className="text-xl font-bold mt-4 mb-2">{p.name}</h3>
+
+            {/* Price */}
+            <div className="text-4xl font-extrabold mb-4">
+              ₹{p.price}
+              <span className="text-sm font-medium text-gray-500 ml-1">
+                / {p.duration_days} days
+              </span>
+            </div>
+
+            {/* Type Badge */}
+            <span className={`inline-block px-4 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r ${gradient}`}>
+              {typeLabel}
+            </span>
+
+            {/* Actions */}
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => {
+                  setEditingId(p.id);
+                  setName(p.name);
+                  setDuration(p.duration_days);
+                  setPrice(p.price);
+                  setMaxMembers(p.max_members);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                className="flex-1 bg-amber-500 text-white py-2 rounded-xl hover:scale-105 transition"
+              >
+                Edit
+              </button>
+
+              <button
+                onClick={() => deletePlan(p.id)}
+                className="flex-1 bg-rose-600 text-white py-2 rounded-xl hover:scale-105 transition"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        );
+      })}
     </div>
-  );
+
+    {plans.length === 0 && (
+      <div className="mt-12 text-center text-gray-500">
+        No plans added yet.
+      </div>
+    )}
+  </div>
+);
 }

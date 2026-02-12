@@ -214,6 +214,208 @@
 //     </div>
 //   );
 // }
+// import { useEffect, useState } from "react";
+// import { supabase } from "../../supabase";
+
+// export default function AdminAddMember() {
+//   const [plans, setPlans] = useState([]);
+//   const [plan, setPlan] = useState(null);
+//   const [singleMember, setSingleMember] = useState({
+//     full_name: "",
+//     phone: "",
+//     photo: null,
+//   });
+//   const [groupMembers, setGroupMembers] = useState([]);
+//   const [loading, setLoading] = useState(false);
+
+//   /* ================= FETCH PLANS ================= */
+//   useEffect(() => {
+//     supabase.from("plans").select("*").then(({ data }) => {
+//       setPlans(data || []);
+//     });
+//   }, []);
+
+//   /* ================= PLAN CHANGE ================= */
+//   function handlePlanChange(planId) {
+//     const p = plans.find((x) => x.id === planId);
+//     setPlan(p);
+
+//     if (p.max_members > 1) {
+//       setGroupMembers(
+//         Array.from({ length: p.max_members }).map((_, i) => ({
+//           full_name: "",
+//           phone: "",
+//           photo: null,
+//           is_primary: i === 0,
+//         }))
+//       );
+//     }
+//   }
+
+//   /* ================= PHOTO UPLOAD ================= */
+//   async function uploadPhoto(file) {
+//     const name = `${crypto.randomUUID()}-${file.name}`;
+//     await supabase.storage.from("member-photos").upload(name, file);
+//     return supabase.storage.from("member-photos").getPublicUrl(name).data.publicUrl;
+//   }
+
+//   /* ================= SUBMIT ================= */
+//   async function handleSubmit() {
+//     if (!plan) return alert("Select plan");
+
+//     const today = new Date();
+//     const start = today.toISOString().split("T")[0];
+//     const expiry = new Date(today.setDate(today.getDate() + plan.duration_days))
+//       .toISOString()
+//       .split("T")[0];
+
+//     setLoading(true);
+
+//     try {
+//       /* ===== SINGLE MEMBER ===== */
+//       if (plan.max_members === 1) {
+//         let photoUrl = null;
+//         if (singleMember.photo) photoUrl = await uploadPhoto(singleMember.photo);
+
+//         await supabase.from("members").insert({
+//           full_name: singleMember.full_name,
+//           phone: singleMember.phone,
+//           photo_url: photoUrl,
+//           plan_id: plan.id,
+//           plan_name: plan.name,
+//           start_date: start,
+//           expiry_date: expiry,
+//         });
+//       }
+
+//       /* ===== GROUP MEMBER ===== */
+//       else {
+//         const { data: group } = await supabase
+//           .from("membership_groups")
+//           .insert({
+//             plan_id: plan.id,
+//             plan_name: plan.name,
+//             start_date: start,
+//             expiry_date: expiry,
+//           })
+//           .select()
+//           .single();
+
+//         for (const m of groupMembers) {
+//           let photoUrl = null;
+//           if (m.photo) photoUrl = await uploadPhoto(m.photo);
+
+//           await supabase.from("group_members").insert({
+//             group_id: group.id,
+//             full_name: m.full_name,
+//             phone: m.phone,
+//             photo_url: photoUrl,
+//             is_primary: m.is_primary,
+//           });
+//         }
+//       }
+
+//       alert("Member added successfully ✅");
+//       window.location.reload();
+//     } catch (err) {
+//       console.error(err);
+//       alert("Error adding member");
+//     } finally {
+//       setLoading(false);
+//     }
+//   }
+
+//   /* ================= UI ================= */
+//   return (
+//     <div className="p-8">
+//       <h1 className="text-2xl font-bold mb-4">Add Member</h1>
+
+//       <select
+//         className="border px-4 py-2 rounded mb-6"
+//         onChange={(e) => handlePlanChange(e.target.value)}
+//       >
+//         <option value="">Select Plan</option>
+//         {plans.map((p) => (
+//           <option key={p.id} value={p.id}>
+//             {p.name} – ₹{p.price}
+//           </option>
+//         ))}
+//       </select>
+
+//       {/* SINGLE */}
+//       {plan?.max_members === 1 && (
+//         <div className="space-y-3">
+//           <input
+//             placeholder="Full name"
+//             className="border px-3 py-2 rounded w-full"
+//             onChange={(e) =>
+//               setSingleMember({ ...singleMember, full_name: e.target.value })
+//             }
+//           />
+//           <input
+//             placeholder="Phone"
+//             className="border px-3 py-2 rounded w-full"
+//             onChange={(e) =>
+//               setSingleMember({ ...singleMember, phone: e.target.value })
+//             }
+//           />
+//           <input
+//             type="file"
+//             onChange={(e) =>
+//               setSingleMember({ ...singleMember, photo: e.target.files[0] })
+//             }
+//           />
+//         </div>
+//       )}
+
+//       {/* GROUP */}
+//       {plan?.max_members > 1 &&
+//         groupMembers.map((m, i) => (
+//           <div key={i} className="border rounded p-4 mb-3">
+//             <b>{m.is_primary ? "Primary" : `Member ${i + 1}`}</b>
+//             <input
+//               className="border px-3 py-2 rounded w-full mt-2"
+//               placeholder="Name"
+//               onChange={(e) => {
+//                 const c = [...groupMembers];
+//                 c[i].full_name = e.target.value;
+//                 setGroupMembers(c);
+//               }}
+//             />
+//             <input
+//               className="border px-3 py-2 rounded w-full mt-2"
+//               placeholder="Phone"
+//               onChange={(e) => {
+//                 const c = [...groupMembers];
+//                 c[i].phone = e.target.value;
+//                 setGroupMembers(c);
+//               }}
+//             />
+//             <input
+//               type="file"
+//               onChange={(e) => {
+//                 const c = [...groupMembers];
+//                 c[i].photo = e.target.files[0];
+//                 setGroupMembers(c);
+//               }}
+//             />
+//           </div>
+//         ))}
+
+//       {plan && (
+//         <button
+//           disabled={loading}
+//           onClick={handleSubmit}
+//           className="mt-4 bg-indigo-600 text-white px-6 py-2 rounded"
+//         >
+//           {loading ? "Saving..." : "Add Member"}
+//         </button>
+//       )}
+//     </div>
+//   );
+// }
+
+
 import { useEffect, useState } from "react";
 import { supabase } from "../../supabase";
 
@@ -228,19 +430,17 @@ export default function AdminAddMember() {
   const [groupMembers, setGroupMembers] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  /* ================= FETCH PLANS ================= */
   useEffect(() => {
     supabase.from("plans").select("*").then(({ data }) => {
       setPlans(data || []);
     });
   }, []);
 
-  /* ================= PLAN CHANGE ================= */
   function handlePlanChange(planId) {
     const p = plans.find((x) => x.id === planId);
     setPlan(p);
 
-    if (p.max_members > 1) {
+    if (p?.max_members > 1) {
       setGroupMembers(
         Array.from({ length: p.max_members }).map((_, i) => ({
           full_name: "",
@@ -252,43 +452,58 @@ export default function AdminAddMember() {
     }
   }
 
-  /* ================= PHOTO UPLOAD ================= */
   async function uploadPhoto(file) {
     const name = `${crypto.randomUUID()}-${file.name}`;
     await supabase.storage.from("member-photos").upload(name, file);
     return supabase.storage.from("member-photos").getPublicUrl(name).data.publicUrl;
   }
 
-  /* ================= SUBMIT ================= */
   async function handleSubmit() {
     if (!plan) return alert("Select plan");
 
     const today = new Date();
     const start = today.toISOString().split("T")[0];
-    const expiry = new Date(today.setDate(today.getDate() + plan.duration_days))
+    const expiry = new Date(
+      today.setDate(today.getDate() + plan.duration_days)
+    )
       .toISOString()
       .split("T")[0];
 
     setLoading(true);
 
     try {
-      /* ===== SINGLE MEMBER ===== */
+      /* SINGLE MEMBER */
       if (plan.max_members === 1) {
         let photoUrl = null;
-        if (singleMember.photo) photoUrl = await uploadPhoto(singleMember.photo);
+        if (singleMember.photo)
+          photoUrl = await uploadPhoto(singleMember.photo);
 
-        await supabase.from("members").insert({
-          full_name: singleMember.full_name,
-          phone: singleMember.phone,
-          photo_url: photoUrl,
+        const { data: member } = await supabase
+          .from("members")
+          .insert({
+            full_name: singleMember.full_name,
+            phone: singleMember.phone,
+            photo_url: photoUrl,
+            plan_id: plan.id,
+            plan_name: plan.name,
+            start_date: start,
+            expiry_date: expiry,
+          })
+          .select()
+          .single();
+
+        /* PAYMENT INSERT */
+        await supabase.from("payments").insert({
+          source_type: "single_new",
+          member_id: member.id,
           plan_id: plan.id,
           plan_name: plan.name,
-          start_date: start,
-          expiry_date: expiry,
+          amount: plan.price,
+          payment_mode: "cash",
         });
       }
 
-      /* ===== GROUP MEMBER ===== */
+      /* GROUP MEMBER */
       else {
         const { data: group } = await supabase
           .from("membership_groups")
@@ -313,6 +528,16 @@ export default function AdminAddMember() {
             is_primary: m.is_primary,
           });
         }
+
+        /* PAYMENT INSERT */
+        await supabase.from("payments").insert({
+          source_type: "group_new",
+          group_id: group.id,
+          plan_id: plan.id,
+          plan_name: plan.name,
+          amount: plan.price,
+          payment_mode: "cash",
+        });
       }
 
       alert("Member added successfully ✅");
@@ -325,42 +550,54 @@ export default function AdminAddMember() {
     }
   }
 
-  /* ================= UI ================= */
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-4">Add Member</h1>
+    <div className="p-10 max-w-3xl mx-auto animate-fadeIn">
+      <h1 className="text-3xl font-bold mb-8">Add Member</h1>
 
-      <select
-        className="border px-4 py-2 rounded mb-6"
-        onChange={(e) => handlePlanChange(e.target.value)}
-      >
-        <option value="">Select Plan</option>
-        {plans.map((p) => (
-          <option key={p.id} value={p.id}>
-            {p.name} – ₹{p.price}
-          </option>
-        ))}
-      </select>
+      {/* PLAN SELECT */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium mb-2">Select Plan</label>
+        <select
+          className="border w-full px-4 py-3 rounded-xl shadow-sm"
+          onChange={(e) => handlePlanChange(e.target.value)}
+        >
+          <option value="">Select Plan</option>
+          {plans.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name} – ₹{p.price}
+            </option>
+          ))}
+        </select>
+      </div>
 
-      {/* SINGLE */}
+      {/* PLAN INFO */}
+      {plan && (
+        <div className="bg-slate-100 p-4 rounded-xl mb-6">
+          <div>Duration: {plan.duration_days} days</div>
+          <div>Max Members: {plan.max_members}</div>
+        </div>
+      )}
+
+      {/* SINGLE FORM */}
       {plan?.max_members === 1 && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           <input
-            placeholder="Full name"
-            className="border px-3 py-2 rounded w-full"
+            placeholder="Full Name"
+            className="border px-4 py-3 rounded-xl w-full"
             onChange={(e) =>
               setSingleMember({ ...singleMember, full_name: e.target.value })
             }
           />
           <input
             placeholder="Phone"
-            className="border px-3 py-2 rounded w-full"
+            className="border px-4 py-3 rounded-xl w-full"
             onChange={(e) =>
               setSingleMember({ ...singleMember, phone: e.target.value })
             }
           />
           <input
             type="file"
+            className="w-full"
             onChange={(e) =>
               setSingleMember({ ...singleMember, photo: e.target.files[0] })
             }
@@ -368,29 +605,34 @@ export default function AdminAddMember() {
         </div>
       )}
 
-      {/* GROUP */}
+      {/* GROUP FORM */}
       {plan?.max_members > 1 &&
         groupMembers.map((m, i) => (
-          <div key={i} className="border rounded p-4 mb-3">
-            <b>{m.is_primary ? "Primary" : `Member ${i + 1}`}</b>
+          <div key={i} className="border rounded-xl p-4 mb-4">
+            <div className="font-semibold mb-2">
+              {m.is_primary ? "Primary Member" : `Member ${i + 1}`}
+            </div>
+
             <input
-              className="border px-3 py-2 rounded w-full mt-2"
-              placeholder="Name"
+              placeholder="Full Name"
+              className="border px-4 py-2 rounded w-full mb-2"
               onChange={(e) => {
                 const c = [...groupMembers];
                 c[i].full_name = e.target.value;
                 setGroupMembers(c);
               }}
             />
+
             <input
-              className="border px-3 py-2 rounded w-full mt-2"
               placeholder="Phone"
+              className="border px-4 py-2 rounded w-full mb-2"
               onChange={(e) => {
                 const c = [...groupMembers];
                 c[i].phone = e.target.value;
                 setGroupMembers(c);
               }}
             />
+
             <input
               type="file"
               onChange={(e) => {
@@ -406,7 +648,7 @@ export default function AdminAddMember() {
         <button
           disabled={loading}
           onClick={handleSubmit}
-          className="mt-4 bg-indigo-600 text-white px-6 py-2 rounded"
+          className="mt-6 w-full bg-indigo-600 text-white py-3 rounded-xl hover:scale-105 transition"
         >
           {loading ? "Saving..." : "Add Member"}
         </button>
