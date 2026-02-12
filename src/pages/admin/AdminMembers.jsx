@@ -357,6 +357,410 @@
 //   );
 // }
 
+// import { useEffect, useState } from "react";
+// import { supabase } from "../../supabase";
+
+// export default function AdminMembers() {
+//   const [singleMembers, setSingleMembers] = useState([]);
+//   const [groupMembers, setGroupMembers] = useState([]);
+//   const [plans, setPlans] = useState([]);
+//   const [filter, setFilter] = useState("all");
+
+//   const [editingMember, setEditingMember] = useState(null);
+//   const [editName, setEditName] = useState("");
+//   const [editPhone, setEditPhone] = useState("");
+
+//   const [renewTarget, setRenewTarget] = useState(null);
+//   const [selectedPlanId, setSelectedPlanId] = useState("");
+
+//   useEffect(() => {
+//     fetchAll();
+//   }, []);
+
+//   async function fetchAll() {
+//     const { data: singles } = await supabase
+//       .from("members")
+//       .select("*")
+//       .order("created_at", { ascending: false });
+
+//     const { data: groups } = await supabase
+//       .from("membership_groups")
+//       .select(
+//         `
+//         id,
+//         plan_id,
+//         plan_name,
+//         start_date,
+//         expiry_date,
+//         group_members (
+//           id,
+//           full_name,
+//           phone,
+//           photo_url,
+//           is_primary
+//         )
+//       `,
+//       )
+//       .order("created_at", { ascending: false });
+
+//     const { data: plans } = await supabase.from("plans").select("*");
+
+//     setSingleMembers(singles || []);
+//     setGroupMembers(groups || []);
+//     setPlans(plans || []);
+//   }
+
+//   /* ================= STATUS ================= */
+
+//   function getStatus(expiry) {
+//     const today = new Date();
+//     const exp = new Date(expiry);
+//     const diff = Math.ceil((exp - today) / 86400000);
+
+//     if (diff < 0) return "expired";
+//     if (diff <= 2) return "due";
+//     return "active";
+//   }
+
+//   function statusBadge(status) {
+//     if (status === "active") return "bg-green-600";
+//     if (status === "due") return "bg-yellow-500";
+//     return "bg-red-600";
+//   }
+
+//   function applyFilter(list) {
+//     if (filter === "all") return list;
+//     return list.filter((i) => getStatus(i.expiry_date) === filter);
+//   }
+
+//   /* ================= RENEW CONFIRM ================= */
+
+//   async function handleRenewConfirm() {
+//     const plan = plans.find((p) => p.id === selectedPlanId);
+//     if (!plan) return alert("Select a plan");
+
+//     // normalize to local date (midnight)
+//     const startDateObj = new Date();
+//     startDateObj.setHours(0, 0, 0, 0);
+
+//     // calculate expiry from start date ONLY
+//     const expiryDateObj = new Date(startDateObj);
+//     expiryDateObj.setDate(expiryDateObj.getDate() + plan.duration_days);
+
+//     const start = startDateObj.toLocaleDateString("en-CA"); // YYYY-MM-DD
+//     const expiryDate = expiryDateObj.toLocaleDateString("en-CA");
+
+//     if (renewTarget.type === "single") {
+//       const m = renewTarget.data;
+
+//       await supabase
+//         .from("members")
+//         .update({
+//           plan_id: plan.id,
+//           plan_name: plan.name,
+//           start_date: start,
+//           expiry_date: expiryDate,
+//         })
+//         .eq("id", m.id);
+
+//       await supabase.from("payments").insert({
+//         source_type: "single_renew",
+//         member_id: m.id,
+//         plan_id: plan.id,
+//         plan_name: plan.name,
+//         amount: plan.price,
+//         payment_mode: "cash",
+//       });
+
+//       await supabase.from("attendance").delete().eq("member_id", m.id);
+//     }
+
+//     if (renewTarget.type === "group") {
+//       const g = renewTarget.data;
+
+//       await supabase
+//         .from("membership_groups")
+//         .update({
+//           plan_id: plan.id,
+//           plan_name: plan.name,
+//           start_date: start,
+//           expiry_date: expiryDate,
+//         })
+//         .eq("id", g.id);
+
+//       await supabase.from("payments").insert({
+//         source_type: "group_renew",
+//         group_id: g.id,
+//         plan_id: plan.id,
+//         plan_name: plan.name,
+//         amount: plan.price,
+//         payment_mode: "cash",
+//       });
+//     }
+
+//     setRenewTarget(null);
+//     setSelectedPlanId("");
+//     fetchAll();
+//   }
+
+//   /* ================= EDIT ================= */
+
+//   async function saveEdit() {
+//     if (!editingMember) return;
+
+//     if (editingMember.type === "single") {
+//       await supabase
+//         .from("members")
+//         .update({ full_name: editName, phone: editPhone })
+//         .eq("id", editingMember.id);
+//     } else {
+//       await supabase
+//         .from("group_members")
+//         .update({ full_name: editName, phone: editPhone })
+//         .eq("id", editingMember.id);
+//     }
+
+//     setEditingMember(null);
+//     fetchAll();
+//   }
+
+//   async function deleteSingle(id) {
+//     if (!confirm("Delete this member?")) return;
+//     await supabase.from("members").delete().eq("id", id);
+//     fetchAll();
+//   }
+
+//   async function deleteGroup(id) {
+//     if (!confirm("Delete this group?")) return;
+//     await supabase.from("membership_groups").delete().eq("id", id);
+//     fetchAll();
+//   }
+
+//   /* ================= UI ================= */
+
+//   return (
+//     <div className="p-8">
+//       <h1 className="text-2xl font-bold mb-4">Members</h1>
+
+//       <select
+//         className="border px-3 py-2 mb-6"
+//         value={filter}
+//         onChange={(e) => setFilter(e.target.value)}
+//       >
+//         <option value="all">All</option>
+//         <option value="active">Active</option>
+//         <option value="due">Due</option>
+//         <option value="expired">Expired</option>
+//       </select>
+
+//       {/* SINGLE MEMBERS */}
+//       <h2 className="font-semibold mb-2">Single Members</h2>
+//       {applyFilter(singleMembers).map((m) => {
+//         const status = getStatus(m.expiry_date);
+
+//         return (
+//           <div key={m.id} className="border p-4 mb-3">
+//             <div className="flex gap-3 items-center">
+//               <img
+//                 src={
+//                   m.photo_url ||
+//                   `https://ui-avatars.com/api/?name=${encodeURIComponent(m.full_name)}`
+//                 }
+//                 className="w-10 h-10 rounded-full"
+//               />
+
+//               <div className="flex-1">
+//                 <b>{m.full_name}</b> – {m.phone}
+//                 <div className="text-sm mt-1">
+//                   {m.plan_name}
+//                   <br />
+//                   Start: {m.start_date}
+//                   <br />
+//                   Expiry: {m.expiry_date}
+//                 </div>
+//               </div>
+
+//               <span
+//                 className={`px-2 py-1 text-xs rounded text-white ${statusBadge(status)}`}
+//               >
+//                 {status.toUpperCase()}
+//               </span>
+
+//               <div className="flex gap-2">
+//                 {(status === "expired" || status === "due") && (
+//                   <button
+//                     onClick={() => setRenewTarget({ type: "single", data: m })}
+//                     className="px-3 py-1 bg-indigo-600 text-white rounded"
+//                   >
+//                     Renew
+//                   </button>
+//                 )}
+
+//                 <button
+//                   onClick={() => {
+//                     setEditingMember({ id: m.id, type: "single" });
+//                     setEditName(m.full_name);
+//                     setEditPhone(m.phone);
+//                   }}
+//                   className="px-3 py-1 bg-yellow-500 text-white rounded"
+//                 >
+//                   Edit
+//                 </button>
+
+//                 <button
+//                   onClick={() => deleteSingle(m.id)}
+//                   className="px-3 py-1 bg-red-600 text-white rounded"
+//                 >
+//                   Delete
+//                 </button>
+//               </div>
+//             </div>
+//           </div>
+//         );
+//       })}
+
+//       {/* GROUP MEMBERS */}
+//       <h2 className="font-semibold mt-6 mb-2">Group Members</h2>
+//       {applyFilter(groupMembers).map((g) => {
+//         const status = getStatus(g.expiry_date);
+
+//         return (
+//           <div key={g.id} className="border p-4 mb-4">
+//             <div className="flex justify-between items-center">
+//               <b>{g.plan_name}</b>
+//               <span
+//                 className={`px-2 py-1 text-xs rounded text-white ${statusBadge(status)}`}
+//               >
+//                 {status.toUpperCase()}
+//               </span>
+//             </div>
+
+//             <div className="text-sm mt-2">
+//               Start: {g.start_date}
+//               <br />
+//               Expiry: {g.expiry_date}
+//             </div>
+
+//             {g.group_members.map((m) => (
+//               <div key={m.id} className="flex gap-3 items-center mt-2">
+//                 <img
+//                   src={
+//                     m.photo_url ||
+//                     `https://ui-avatars.com/api/?name=${encodeURIComponent(m.full_name)}`
+//                   }
+//                   className="w-8 h-8 rounded-full"
+//                 />
+//                 <span className="flex-1">
+//                   {m.is_primary && "👑 "} {m.full_name} – {m.phone}
+//                 </span>
+
+//                 <button
+//                   onClick={() => {
+//                     setEditingMember({ id: m.id, type: "group" });
+//                     setEditName(m.full_name);
+//                     setEditPhone(m.phone);
+//                   }}
+//                   className="px-2 py-1 bg-yellow-500 text-white rounded"
+//                 >
+//                   Edit
+//                 </button>
+//               </div>
+//             ))}
+
+//             {(status === "expired" || status === "due") && (
+//               <button
+//                 onClick={() => setRenewTarget({ type: "group", data: g })}
+//                 className="mt-3 px-3 py-1 bg-indigo-600 text-white rounded"
+//               >
+//                 Renew Group
+//               </button>
+//             )}
+
+//             <button
+//               onClick={() => deleteGroup(g.id)}
+//               className="mt-3 ml-2 px-3 py-1 bg-red-600 text-white rounded"
+//             >
+//               Delete Group
+//             </button>
+//           </div>
+//         );
+//       })}
+
+//       {/* RENEW MODAL */}
+//       {renewTarget && (
+//         <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
+//           <div className="bg-white p-6 rounded w-96">
+//             <h3 className="font-semibold mb-4">Renew Membership</h3>
+
+//             <select
+//               className="border px-3 py-2 w-full mb-4"
+//               onChange={(e) => setSelectedPlanId(e.target.value)}
+//             >
+//               <option value="">Select Plan</option>
+//               {plans.map((p) => (
+//                 <option key={p.id} value={p.id}>
+//                   {p.name} – ₹{p.price}
+//                 </option>
+//               ))}
+//             </select>
+
+//             <div className="flex gap-2">
+//               <button
+//                 onClick={handleRenewConfirm}
+//                 className="flex-1 bg-indigo-600 text-white py-2 rounded"
+//               >
+//                 Renew
+//               </button>
+//               <button
+//                 onClick={() => setRenewTarget(null)}
+//                 className="flex-1 bg-gray-300 py-2 rounded"
+//               >
+//                 Cancel
+//               </button>
+//             </div>
+//           </div>
+//         </div>
+//       )}
+
+//       {/* EDIT MODAL */}
+//       {editingMember && (
+//         <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
+//           <div className="bg-white p-6 rounded w-96">
+//             <h3 className="font-semibold mb-3">Edit Member</h3>
+
+//             <input
+//               className="border w-full px-3 py-2 mb-3"
+//               value={editName}
+//               onChange={(e) => setEditName(e.target.value)}
+//             />
+
+//             <input
+//               className="border w-full px-3 py-2 mb-3"
+//               value={editPhone}
+//               onChange={(e) => setEditPhone(e.target.value)}
+//             />
+
+//             <div className="flex gap-2">
+//               <button
+//                 onClick={saveEdit}
+//                 className="flex-1 bg-indigo-600 text-white py-2 rounded"
+//               >
+//                 Save
+//               </button>
+//               <button
+//                 onClick={() => setEditingMember(null)}
+//                 className="flex-1 bg-gray-300 py-2 rounded"
+//               >
+//                 Cancel
+//               </button>
+//             </div>
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   );
+// }
+
 import { useEffect, useState } from "react";
 import { supabase } from "../../supabase";
 
@@ -410,22 +814,13 @@ export default function AdminMembers() {
     setPlans(plans || []);
   }
 
-  /* ================= STATUS ================= */
-
   function getStatus(expiry) {
     const today = new Date();
     const exp = new Date(expiry);
     const diff = Math.ceil((exp - today) / 86400000);
-
     if (diff < 0) return "expired";
     if (diff <= 2) return "due";
     return "active";
-  }
-
-  function statusBadge(status) {
-    if (status === "active") return "bg-green-600";
-    if (status === "due") return "bg-yellow-500";
-    return "bg-red-600";
   }
 
   function applyFilter(list) {
@@ -433,21 +828,17 @@ export default function AdminMembers() {
     return list.filter((i) => getStatus(i.expiry_date) === filter);
   }
 
-  /* ================= RENEW CONFIRM ================= */
-
   async function handleRenewConfirm() {
     const plan = plans.find((p) => p.id === selectedPlanId);
     if (!plan) return alert("Select a plan");
 
-    // normalize to local date (midnight)
     const startDateObj = new Date();
     startDateObj.setHours(0, 0, 0, 0);
 
-    // calculate expiry from start date ONLY
     const expiryDateObj = new Date(startDateObj);
     expiryDateObj.setDate(expiryDateObj.getDate() + plan.duration_days);
 
-    const start = startDateObj.toLocaleDateString("en-CA"); // YYYY-MM-DD
+    const start = startDateObj.toLocaleDateString("en-CA");
     const expiryDate = expiryDateObj.toLocaleDateString("en-CA");
 
     if (renewTarget.type === "single") {
@@ -503,8 +894,6 @@ export default function AdminMembers() {
     fetchAll();
   }
 
-  /* ================= EDIT ================= */
-
   async function saveEdit() {
     if (!editingMember) return;
 
@@ -538,12 +927,186 @@ export default function AdminMembers() {
 
   /* ================= UI ================= */
 
+  // return (
+  //   <div>
+  //     <div className="flex justify-between items-center mb-8">
+  //       <h1 className="text-3xl font-bold">Members</h1>
+
+  //       <select
+  //         className="border px-4 py-2 rounded-xl"
+  //         value={filter}
+  //         onChange={(e) => setFilter(e.target.value)}
+  //       >
+  //         <option value="all">All</option>
+  //         <option value="active">Active</option>
+  //         <option value="due">Due</option>
+  //         <option value="expired">Expired</option>
+  //       </select>
+  //     </div>
+
+  //     {/* SINGLE MEMBERS */}
+  //     <div className="grid md:grid-cols-3 gap-6 mb-12">
+  //       {applyFilter(singleMembers).map((m) => {
+  //         const status = getStatus(m.expiry_date);
+
+  //         const accent =
+  //           status === "active"
+  //             ? "from-emerald-500 to-green-600"
+  //             : status === "due"
+  //               ? "from-amber-500 to-orange-600"
+  //               : "from-rose-500 to-red-600";
+
+  //         return (
+  //           <div
+  //             key={m.id}
+  //             className="relative rounded-3xl p-6 bg-white shadow-xl hover:shadow-2xl transition overflow-hidden"
+  //           >
+  //             <div className="flex items-center gap-4 mb-4">
+  //               <img
+  //                 src={
+  //                   m.photo_url ||
+  //                   `https://ui-avatars.com/api/?name=${encodeURIComponent(
+  //                     m.full_name,
+  //                   )}`
+  //                 }
+  //                 className="w-16 h-16 rounded-full object-cover"
+  //               />
+  //               <div>
+  //                 <h3 className="text-lg font-semibold">{m.full_name}</h3>
+  //                 <p className="text-sm text-slate-500">{m.phone}</p>
+  //               </div>
+  //             </div>
+
+  //             <div className="text-sm mb-4 space-y-1">
+  //               <div>Plan: {m.plan_name}</div>
+  //               <div>Expiry: {m.expiry_date}</div>
+  //             </div>
+
+  //             <div className="flex gap-2 flex-wrap">
+  //               {(status === "expired" || status === "due") && (
+  //                 <button
+  //                   onClick={() => setRenewTarget({ type: "single", data: m })}
+  //                   className="flex-1 bg-indigo-600 text-white py-2 rounded-xl"
+  //                 >
+  //                   Renew
+  //                 </button>
+  //               )}
+
+  //               <button
+  //                 onClick={() => {
+  //                   setEditingMember({ id: m.id, type: "single" });
+  //                   setEditName(m.full_name);
+  //                   setEditPhone(m.phone);
+  //                 }}
+  //                 className="flex-1 bg-yellow-500 text-white py-2 rounded-xl"
+  //               >
+  //                 Edit
+  //               </button>
+
+  //               <button
+  //                 onClick={() => deleteSingle(m.id)}
+  //                 className="flex-1 bg-red-600 text-white py-2 rounded-xl"
+  //               >
+  //                 Delete
+  //               </button>
+  //             </div>
+  //           </div>
+  //         );
+  //       })}
+  //     </div>
+
+  //     {/* GROUP MEMBERS */}
+  //     <div className="grid md:grid-cols-3 gap-6">
+  //       {applyFilter(groupMembers).map((g) => {
+  //         const status = getStatus(g.expiry_date);
+
+  //         const bgStyle =
+  //           status === "active"
+  //             ? "bg-green-50 border-green-200"
+  //             : status === "due"
+  //               ? "bg-yellow-50 border-yellow-200"
+  //               : "bg-red-50 border-red-200";
+
+  //         return (
+  //           <div
+  //             key={g.id}
+  //             className={`rounded-3xl border p-6 shadow-lg ${bgStyle}`}
+  //           >
+  //             <h3 className="font-semibold mb-2">{g.plan_name}</h3>
+  //             <p className="text-sm mb-3">Expiry: {g.expiry_date}</p>
+
+  //             {g.group_members.map((m) => (
+  //               <div key={m.id} className="flex items-center gap-3 mb-2">
+  //                 <img
+  //                   src={
+  //                     m.photo_url ||
+  //                     `https://ui-avatars.com/api/?name=${encodeURIComponent(
+  //                       m.full_name,
+  //                     )}`
+  //                   }
+  //                   className="w-10 h-10 rounded-full"
+  //                 />
+  //                 <span>
+  //                   {m.is_primary && "👑 "}
+  //                   {m.full_name}
+  //                 </span>
+  //               </div>
+  //             ))}
+
+  //             {(status === "expired" || status === "due") && (
+  //               <button
+  //                 onClick={() => setRenewTarget({ type: "group", data: g })}
+  //                 className="mt-3 w-full bg-indigo-600 text-white py-2 rounded-xl"
+  //               >
+  //                 Renew Group
+  //               </button>
+  //             )}
+
+  //             <button
+  //               onClick={() => deleteGroup(g.id)}
+  //               className="mt-3 w-full bg-red-600 text-white py-2 rounded-xl"
+  //             >
+  //               Delete Group
+  //             </button>
+  //           </div>
+  //         );
+  //       })}
+  //     </div>
+
+  //     {/* EDIT MODAL */}
+  //     {editingMember && (
+  //       <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
+  //         <div className="bg-white p-6 rounded-2xl w-96">
+  //           <input
+  //             className="border w-full px-3 py-2 mb-3"
+  //             value={editName}
+  //             onChange={(e) => setEditName(e.target.value)}
+  //           />
+  //           <input
+  //             className="border w-full px-3 py-2 mb-3"
+  //             value={editPhone}
+  //             onChange={(e) => setEditPhone(e.target.value)}
+  //           />
+  //           <button
+  //             onClick={saveEdit}
+  //             className="w-full bg-indigo-600 text-white py-2 rounded-xl"
+  //           >
+  //             Save
+  //           </button>
+  //         </div>
+  //       </div>
+  //     )}
+  //   </div>
+  // );
+
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-4">Members</h1>
+  <div>
+    {/* HEADER */}
+    <div className="flex justify-between items-center mb-10">
+      <h1 className="text-3xl font-bold">Members</h1>
 
       <select
-        className="border px-3 py-2 mb-6"
+        className="border px-4 py-2 rounded-xl shadow-sm"
         value={filter}
         onChange={(e) => setFilter(e.target.value)}
       >
@@ -552,125 +1115,171 @@ export default function AdminMembers() {
         <option value="due">Due</option>
         <option value="expired">Expired</option>
       </select>
+    </div>
 
-      {/* SINGLE MEMBERS */}
-      <h2 className="font-semibold mb-2">Single Members</h2>
+    {/* ================= SINGLE MEMBERS ================= */}
+    <h2 className="text-xl font-semibold mb-6">Single Members</h2>
+
+    <div className="grid md:grid-cols-3 gap-8 mb-14">
       {applyFilter(singleMembers).map((m) => {
         const status = getStatus(m.expiry_date);
 
+        const accent =
+          status === "active"
+            ? "from-emerald-500 to-green-600"
+            : status === "due"
+            ? "from-amber-500 to-orange-600"
+            : "from-rose-500 to-red-600";
+
         return (
-          <div key={m.id} className="border p-4 mb-3">
-            <div className="flex gap-3 items-center">
+          <div
+            key={m.id}
+            className="relative rounded-3xl p-6 bg-white shadow-xl hover:shadow-2xl transition overflow-hidden"
+          >
+            {/* Accent Strip */}
+            <div
+              className={`absolute left-0 top-0 h-full w-2 bg-gradient-to-b ${accent}`}
+            ></div>
+
+            {/* Profile */}
+            <div className="flex items-center gap-4 mb-5">
               <img
                 src={
                   m.photo_url ||
-                  `https://ui-avatars.com/api/?name=${encodeURIComponent(m.full_name)}`
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    m.full_name
+                  )}`
                 }
-                className="w-10 h-10 rounded-full"
+                className="w-16 h-16 rounded-full object-cover border shadow-sm"
               />
-
-              <div className="flex-1">
-                <b>{m.full_name}</b> – {m.phone}
-                <div className="text-sm mt-1">
-                  {m.plan_name}
-                  <br />
-                  Start: {m.start_date}
-                  <br />
-                  Expiry: {m.expiry_date}
-                </div>
+              <div>
+                <h3 className="text-lg font-semibold">
+                  {m.full_name}
+                </h3>
+                <p className="text-sm text-slate-500">
+                  {m.phone}
+                </p>
               </div>
+            </div>
 
+            {/* Plan Info */}
+            <div className="text-sm text-slate-600 space-y-1 mb-5">
+              <div>Plan: {m.plan_name}</div>
+              <div>Expiry: {m.expiry_date}</div>
+            </div>
+
+            {/* Status Badge */}
+            <div className="mb-5">
               <span
-                className={`px-2 py-1 text-xs rounded text-white ${statusBadge(status)}`}
+                className={`px-3 py-1 text-xs rounded-full font-semibold text-white
+                  ${
+                    status === "active"
+                      ? "bg-gradient-to-r from-emerald-500 to-green-600"
+                      : status === "due"
+                      ? "bg-gradient-to-r from-amber-500 to-orange-600"
+                      : "bg-gradient-to-r from-rose-500 to-red-600"
+                  }
+                `}
               >
                 {status.toUpperCase()}
               </span>
+            </div>
 
-              <div className="flex gap-2">
-                {(status === "expired" || status === "due") && (
-                  <button
-                    onClick={() => setRenewTarget({ type: "single", data: m })}
-                    className="px-3 py-1 bg-indigo-600 text-white rounded"
-                  >
-                    Renew
-                  </button>
-                )}
-
+            {/* Buttons */}
+            <div className="flex gap-3 flex-wrap">
+              {(status === "expired" || status === "due") && (
                 <button
-                  onClick={() => {
-                    setEditingMember({ id: m.id, type: "single" });
-                    setEditName(m.full_name);
-                    setEditPhone(m.phone);
-                  }}
-                  className="px-3 py-1 bg-yellow-500 text-white rounded"
+                  onClick={() =>
+                    setRenewTarget({ type: "single", data: m })
+                  }
+                  className="flex-1 bg-indigo-600 text-white py-2 rounded-xl hover:scale-105 transition"
                 >
-                  Edit
+                  Renew
                 </button>
+              )}
 
-                <button
-                  onClick={() => deleteSingle(m.id)}
-                  className="px-3 py-1 bg-red-600 text-white rounded"
-                >
-                  Delete
-                </button>
-              </div>
+              <button
+                onClick={() => {
+                  setEditingMember({ id: m.id, type: "single" });
+                  setEditName(m.full_name);
+                  setEditPhone(m.phone);
+                }}
+                className="flex-1 bg-yellow-500 text-white py-2 rounded-xl hover:scale-105 transition"
+              >
+                Edit
+              </button>
+
+              <button
+                onClick={() => deleteSingle(m.id)}
+                className="flex-1 bg-red-600 text-white py-2 rounded-xl hover:scale-105 transition"
+              >
+                Delete
+              </button>
             </div>
           </div>
         );
       })}
+    </div>
 
-      {/* GROUP MEMBERS */}
-      <h2 className="font-semibold mt-6 mb-2">Group Members</h2>
+    {/* ================= GROUP MEMBERS ================= */}
+    <h2 className="text-xl font-semibold mb-6">Group Members</h2>
+
+    <div className="grid md:grid-cols-3 gap-8">
       {applyFilter(groupMembers).map((g) => {
         const status = getStatus(g.expiry_date);
 
-        return (
-          <div key={g.id} className="border p-4 mb-4">
-            <div className="flex justify-between items-center">
-              <b>{g.plan_name}</b>
-              <span
-                className={`px-2 py-1 text-xs rounded text-white ${statusBadge(status)}`}
-              >
-                {status.toUpperCase()}
-              </span>
-            </div>
+        const accent =
+          status === "active"
+            ? "from-emerald-500 to-green-600"
+            : status === "due"
+            ? "from-amber-500 to-orange-600"
+            : "from-rose-500 to-red-600";
 
-            <div className="text-sm mt-2">
-              Start: {g.start_date}
-              <br />
+        return (
+          <div
+            key={g.id}
+            className="relative rounded-3xl p-6 bg-white shadow-xl hover:shadow-2xl transition overflow-hidden"
+          >
+            {/* Accent Strip */}
+            <div
+              className={`absolute left-0 top-0 h-full w-2 bg-gradient-to-b ${accent}`}
+            ></div>
+
+            <h3 className="font-semibold mb-2">
+              {g.plan_name}
+            </h3>
+
+            <p className="text-sm text-slate-500 mb-4">
               Expiry: {g.expiry_date}
-            </div>
+            </p>
 
             {g.group_members.map((m) => (
-              <div key={m.id} className="flex gap-3 items-center mt-2">
+              <div
+                key={m.id}
+                className="flex items-center gap-3 mb-3"
+              >
                 <img
                   src={
                     m.photo_url ||
-                    `https://ui-avatars.com/api/?name=${encodeURIComponent(m.full_name)}`
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      m.full_name
+                    )}`
                   }
-                  className="w-8 h-8 rounded-full"
+                  className="w-10 h-10 rounded-full"
                 />
-                <span className="flex-1">
-                  {m.is_primary && "👑 "} {m.full_name} – {m.phone}
+                <span className="text-sm">
+                  {m.is_primary && "👑 "}
+                  {m.full_name}
                 </span>
-
-                <button
-                  onClick={() => {
-                    setEditingMember({ id: m.id, type: "group" });
-                    setEditName(m.full_name);
-                    setEditPhone(m.phone);
-                  }}
-                  className="px-2 py-1 bg-yellow-500 text-white rounded"
-                >
-                  Edit
-                </button>
               </div>
             ))}
 
             {(status === "expired" || status === "due") && (
               <button
-                onClick={() => setRenewTarget({ type: "group", data: g })}
-                className="mt-3 px-3 py-1 bg-indigo-600 text-white rounded"
+                onClick={() =>
+                  setRenewTarget({ type: "group", data: g })
+                }
+                className="mt-4 w-full bg-indigo-600 text-white py-2 rounded-xl hover:scale-105 transition"
               >
                 Renew Group
               </button>
@@ -678,85 +1287,43 @@ export default function AdminMembers() {
 
             <button
               onClick={() => deleteGroup(g.id)}
-              className="mt-3 ml-2 px-3 py-1 bg-red-600 text-white rounded"
+              className="mt-3 w-full bg-red-600 text-white py-2 rounded-xl hover:scale-105 transition"
             >
               Delete Group
             </button>
           </div>
         );
       })}
-
-      {/* RENEW MODAL */}
-      {renewTarget && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-          <div className="bg-white p-6 rounded w-96">
-            <h3 className="font-semibold mb-4">Renew Membership</h3>
-
-            <select
-              className="border px-3 py-2 w-full mb-4"
-              onChange={(e) => setSelectedPlanId(e.target.value)}
-            >
-              <option value="">Select Plan</option>
-              {plans.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name} – ₹{p.price}
-                </option>
-              ))}
-            </select>
-
-            <div className="flex gap-2">
-              <button
-                onClick={handleRenewConfirm}
-                className="flex-1 bg-indigo-600 text-white py-2 rounded"
-              >
-                Renew
-              </button>
-              <button
-                onClick={() => setRenewTarget(null)}
-                className="flex-1 bg-gray-300 py-2 rounded"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* EDIT MODAL */}
-      {editingMember && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-          <div className="bg-white p-6 rounded w-96">
-            <h3 className="font-semibold mb-3">Edit Member</h3>
-
-            <input
-              className="border w-full px-3 py-2 mb-3"
-              value={editName}
-              onChange={(e) => setEditName(e.target.value)}
-            />
-
-            <input
-              className="border w-full px-3 py-2 mb-3"
-              value={editPhone}
-              onChange={(e) => setEditPhone(e.target.value)}
-            />
-
-            <div className="flex gap-2">
-              <button
-                onClick={saveEdit}
-                className="flex-1 bg-indigo-600 text-white py-2 rounded"
-              >
-                Save
-              </button>
-              <button
-                onClick={() => setEditingMember(null)}
-                className="flex-1 bg-gray-300 py-2 rounded"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
-  );
+
+    {/* EDIT MODAL */}
+    {editingMember && (
+      <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
+        <div className="bg-white p-6 rounded-2xl w-96 shadow-xl">
+          <h3 className="font-semibold mb-4">Edit Member</h3>
+
+          <input
+            className="border w-full px-3 py-2 mb-3 rounded-lg"
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+          />
+
+          <input
+            className="border w-full px-3 py-2 mb-4 rounded-lg"
+            value={editPhone}
+            onChange={(e) => setEditPhone(e.target.value)}
+          />
+
+          <button
+            onClick={saveEdit}
+            className="w-full bg-indigo-600 text-white py-2 rounded-xl"
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    )}
+  </div>
+);
+
 }
