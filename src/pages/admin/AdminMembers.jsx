@@ -133,6 +133,16 @@ export default function AdminMembers() {
   }
 
   async function saveEdit() {
+    if (!/^[A-Za-z ]{2,50}$/.test(editName)) {
+      alert("Invalid name");
+      return;
+    }
+
+    if (!/^[6-9]\d{9}$/.test(editPhone)) {
+      alert("Invalid phone number");
+      return;
+    }
+
     if (!editingMember) return;
 
     if (editingMember.type === "single") {

@@ -186,6 +186,16 @@ export default function AdminPlans() {
   }
 
   async function savePlan(e) {
+    if (!/^[A-Za-z0-9 ]{3,30}$/.test(name)) {
+      alert("Invalid plan name");
+      return;
+    }
+
+    if (duration <= 0 || price <= 0) {
+      alert("Duration and price must be positive numbers");
+      return;
+    }
+
     e.preventDefault();
     setLoading(true);
 
@@ -216,144 +226,145 @@ export default function AdminPlans() {
   }
 
   return (
-  <div className="p-10 min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 animate-fadeIn">
-
-    {/* HEADER */}
-    <div className="flex justify-between items-center mb-10">
-      <h1 className="text-4xl font-bold tracking-tight">Plans & Packs</h1>
-    </div>
-
-    {/* ADD / EDIT FORM */}
-    <form
-      onSubmit={savePlan}
-      className="bg-white shadow-xl rounded-3xl p-8 mb-12 border"
-    >
-      <h2 className="text-xl font-semibold mb-6">
-        {editingId ? "Update Plan" : "Create New Plan"}
-      </h2>
-
-      <div className="grid md:grid-cols-4 gap-6">
-
-        <input
-          placeholder="Plan Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="px-4 py-3 rounded-xl border focus:ring-2 focus:ring-indigo-500 outline-none"
-          required
-        />
-
-        <input
-          type="number"
-          placeholder="Duration (days)"
-          value={duration}
-          onChange={(e) => setDuration(e.target.value)}
-          className="px-4 py-3 rounded-xl border focus:ring-2 focus:ring-indigo-500 outline-none"
-          required
-        />
-
-        <input
-          type="number"
-          placeholder="Price (₹)"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-          className="px-4 py-3 rounded-xl border focus:ring-2 focus:ring-indigo-500 outline-none"
-          required
-        />
-
-        <input
-          type="number"
-          min={1}
-          placeholder="No. of Members"
-          value={maxMembers}
-          onChange={(e) => setMaxMembers(e.target.value)}
-          className="px-4 py-3 rounded-xl border focus:ring-2 focus:ring-indigo-500 outline-none"
-          required
-        />
+    <div className="p-10 min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 animate-fadeIn">
+      {/* HEADER */}
+      <div className="flex justify-between items-center mb-10">
+        <h1 className="text-4xl font-bold tracking-tight">Plans & Packs</h1>
       </div>
 
-      <button
-        disabled={loading}
-        className="mt-8 w-full py-3 rounded-xl bg-indigo-600 text-white font-semibold hover:scale-[1.02] transition"
+      {/* ADD / EDIT FORM */}
+      <form
+        onSubmit={savePlan}
+        className="bg-white shadow-xl rounded-3xl p-8 mb-12 border"
       >
-        {loading ? "Saving..." : editingId ? "Update Plan" : "Add Plan"}
-      </button>
-    </form>
+        <h2 className="text-xl font-semibold mb-6">
+          {editingId ? "Update Plan" : "Create New Plan"}
+        </h2>
 
-    {/* PLAN CARDS */}
-    <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-4 gap-6">
+          <input
+            placeholder="Plan Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="px-4 py-3 rounded-xl border focus:ring-2 focus:ring-indigo-500 outline-none"
+            required
+          />
 
-      {plans.map((p) => {
-        const typeLabel =
-          p.max_members === 1
-            ? "Single"
-            : p.max_members === 2
-            ? "Couple"
-            : `Buddy (${p.max_members})`;
+          <input
+            type="number"
+            placeholder="Duration (days)"
+            value={duration}
+            onChange={(e) => setDuration(e.target.value)}
+            className="px-4 py-3 rounded-xl border focus:ring-2 focus:ring-indigo-500 outline-none"
+            required
+          />
 
-        const gradient =
-          p.max_members === 1
-            ? "from-emerald-500 to-green-600"
-            : p.max_members === 2
-            ? "from-blue-500 to-indigo-600"
-            : "from-purple-500 to-pink-600";
+          <input
+            type="number"
+            placeholder="Price (₹)"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            className="px-4 py-3 rounded-xl border focus:ring-2 focus:ring-indigo-500 outline-none"
+            required
+          />
 
-        return (
-          <div
-            key={p.id}
-            className="relative bg-white rounded-3xl shadow-xl p-8 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
-          >
-            {/* Top Gradient Strip */}
-            <div className={`absolute top-0 left-0 w-full h-2 bg-gradient-to-r ${gradient} rounded-t-3xl`} />
+          <input
+            type="number"
+            min={1}
+            placeholder="No. of Members"
+            value={maxMembers}
+            onChange={(e) => setMaxMembers(e.target.value)}
+            className="px-4 py-3 rounded-xl border focus:ring-2 focus:ring-indigo-500 outline-none"
+            required
+          />
+        </div>
 
-            {/* Plan Name */}
-            <h3 className="text-xl font-bold mt-4 mb-2">{p.name}</h3>
+        <button
+          disabled={loading}
+          className="mt-8 w-full py-3 rounded-xl bg-indigo-600 text-white font-semibold hover:scale-[1.02] transition"
+        >
+          {loading ? "Saving..." : editingId ? "Update Plan" : "Add Plan"}
+        </button>
+      </form>
 
-            {/* Price */}
-            <div className="text-4xl font-extrabold mb-4">
-              ₹{p.price}
-              <span className="text-sm font-medium text-gray-500 ml-1">
-                / {p.duration_days} days
+      {/* PLAN CARDS */}
+      <div className="grid md:grid-cols-3 gap-8">
+        {plans.map((p) => {
+          const typeLabel =
+            p.max_members === 1
+              ? "Single"
+              : p.max_members === 2
+                ? "Couple"
+                : `Buddy (${p.max_members})`;
+
+          const gradient =
+            p.max_members === 1
+              ? "from-emerald-500 to-green-600"
+              : p.max_members === 2
+                ? "from-blue-500 to-indigo-600"
+                : "from-purple-500 to-pink-600";
+
+          return (
+            <div
+              key={p.id}
+              className="relative bg-white rounded-3xl shadow-xl p-8 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
+            >
+              {/* Top Gradient Strip */}
+              <div
+                className={`absolute top-0 left-0 w-full h-2 bg-gradient-to-r ${gradient} rounded-t-3xl`}
+              />
+
+              {/* Plan Name */}
+              <h3 className="text-xl font-bold mt-4 mb-2">{p.name}</h3>
+
+              {/* Price */}
+              <div className="text-4xl font-extrabold mb-4">
+                ₹{p.price}
+                <span className="text-sm font-medium text-gray-500 ml-1">
+                  / {p.duration_days} days
+                </span>
+              </div>
+
+              {/* Type Badge */}
+              <span
+                className={`inline-block px-4 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r ${gradient}`}
+              >
+                {typeLabel}
               </span>
+
+              {/* Actions */}
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => {
+                    setEditingId(p.id);
+                    setName(p.name);
+                    setDuration(p.duration_days);
+                    setPrice(p.price);
+                    setMaxMembers(p.max_members);
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                  className="flex-1 bg-amber-500 text-white py-2 rounded-xl hover:scale-105 transition"
+                >
+                  Edit
+                </button>
+
+                <button
+                  onClick={() => deletePlan(p.id)}
+                  className="flex-1 bg-rose-600 text-white py-2 rounded-xl hover:scale-105 transition"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
-
-            {/* Type Badge */}
-            <span className={`inline-block px-4 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r ${gradient}`}>
-              {typeLabel}
-            </span>
-
-            {/* Actions */}
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={() => {
-                  setEditingId(p.id);
-                  setName(p.name);
-                  setDuration(p.duration_days);
-                  setPrice(p.price);
-                  setMaxMembers(p.max_members);
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }}
-                className="flex-1 bg-amber-500 text-white py-2 rounded-xl hover:scale-105 transition"
-              >
-                Edit
-              </button>
-
-              <button
-                onClick={() => deletePlan(p.id)}
-                className="flex-1 bg-rose-600 text-white py-2 rounded-xl hover:scale-105 transition"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-
-    {plans.length === 0 && (
-      <div className="mt-12 text-center text-gray-500">
-        No plans added yet.
+          );
+        })}
       </div>
-    )}
-  </div>
-);
+
+      {plans.length === 0 && (
+        <div className="mt-12 text-center text-gray-500">
+          No plans added yet.
+        </div>
+      )}
+    </div>
+  );
 }

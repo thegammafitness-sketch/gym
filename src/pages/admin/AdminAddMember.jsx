@@ -415,7 +415,6 @@
 //   );
 // }
 
-
 import { useEffect, useState } from "react";
 import { supabase } from "../../supabase";
 
@@ -431,9 +430,12 @@ export default function AdminAddMember() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    supabase.from("plans").select("*").then(({ data }) => {
-      setPlans(data || []);
-    });
+    supabase
+      .from("plans")
+      .select("*")
+      .then(({ data }) => {
+        setPlans(data || []);
+      });
   }, []);
 
   function handlePlanChange(planId) {
@@ -447,7 +449,7 @@ export default function AdminAddMember() {
           phone: "",
           photo: null,
           is_primary: i === 0,
-        }))
+        })),
       );
     }
   }
@@ -455,7 +457,8 @@ export default function AdminAddMember() {
   async function uploadPhoto(file) {
     const name = `${crypto.randomUUID()}-${file.name}`;
     await supabase.storage.from("member-photos").upload(name, file);
-    return supabase.storage.from("member-photos").getPublicUrl(name).data.publicUrl;
+    return supabase.storage.from("member-photos").getPublicUrl(name).data
+      .publicUrl;
   }
 
   async function handleSubmit() {
@@ -463,13 +466,21 @@ export default function AdminAddMember() {
 
     const today = new Date();
     const start = today.toISOString().split("T")[0];
-    const expiry = new Date(
-      today.setDate(today.getDate() + plan.duration_days)
-    )
+    const expiry = new Date(today.setDate(today.getDate() + plan.duration_days))
       .toISOString()
       .split("T")[0];
 
     setLoading(true);
+
+    if (!/^[A-Za-z ]{2,50}$/.test(singleMember.full_name)) {
+      alert("Enter valid name (only letters)");
+      return;
+    }
+
+    if (!/^[6-9]\d{9}$/.test(singleMember.phone)) {
+      alert("Enter valid 10-digit Indian mobile number");
+      return;
+    }
 
     try {
       /* SINGLE MEMBER */
@@ -501,10 +512,8 @@ export default function AdminAddMember() {
           amount: plan.price,
           payment_mode: "cash",
         });
-      }
-
-      /* GROUP MEMBER */
-      else {
+      } else {
+        /* GROUP MEMBER */
         const { data: group } = await supabase
           .from("membership_groups")
           .insert({
@@ -517,6 +526,16 @@ export default function AdminAddMember() {
           .single();
 
         for (const m of groupMembers) {
+          if (!/^[A-Za-z ]{2,50}$/.test(m.full_name)) {
+            alert("Enter valid name for all members");
+            return;
+          }
+
+          if (!/^[6-9]\d{9}$/.test(m.phone)) {
+            alert("Enter valid phone for all members");
+            return;
+          }
+
           let photoUrl = null;
           if (m.photo) photoUrl = await uploadPhoto(m.photo);
 
