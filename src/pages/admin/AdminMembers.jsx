@@ -14,7 +14,12 @@ export default function AdminMembers() {
   const [renewTarget, setRenewTarget] = useState(null);
   const [selectedPlanId, setSelectedPlanId] = useState("");
   const [selectedMember, setSelectedMember] = useState(null);
-
+  const [editPhoto, setEditPhoto] = useState(null);
+  const [editPlanId, setEditPlanId] = useState("");
+  const [editingGroup, setEditingGroup] = useState(null);
+  const [selectedStartDate, setSelectedStartDate] = useState(
+    new Date().toISOString().split("T")[0],
+  );
   useEffect(() => {
     fetchAll();
   }, []);
@@ -65,13 +70,23 @@ export default function AdminMembers() {
     if (filter === "all") return list;
     return list.filter((i) => getStatus(i.expiry_date) === filter);
   }
+  async function uploadPhoto(file) {
+    const name = `${crypto.randomUUID()}-${file.name}`;
 
+    await supabase.storage.from("member-photos").upload(name, file);
+
+    return supabase.storage.from("member-photos").getPublicUrl(name).data
+      .publicUrl;
+  }
   async function handleRenewConfirm() {
     const plan = plans.find((p) => p.id === selectedPlanId);
-    if (!plan) return alert("Select a plan");
 
-    const startDateObj = new Date();
-    startDateObj.setHours(0, 0, 0, 0);
+    if (!plan) {
+      alert("Select a plan");
+      return;
+    }
+
+    const startDateObj = new Date(selectedStartDate);
 
     const expiryDateObj = new Date(startDateObj);
     expiryDateObj.setDate(expiryDateObj.getDate() + plan.duration_days);
@@ -79,6 +94,7 @@ export default function AdminMembers() {
     const start = startDateObj.toLocaleDateString("en-CA");
     const expiryDate = expiryDateObj.toLocaleDateString("en-CA");
 
+    /* SINGLE MEMBER RENEW */
     if (renewTarget.type === "single") {
       const m = renewTarget.data;
 
@@ -100,10 +116,9 @@ export default function AdminMembers() {
         amount: plan.price,
         payment_mode: "cash",
       });
-
-      await supabase.from("attendance").delete().eq("member_id", m.id);
     }
 
+    /* GROUP RENEW */
     if (renewTarget.type === "group") {
       const g = renewTarget.data;
 
@@ -129,38 +144,141 @@ export default function AdminMembers() {
 
     setRenewTarget(null);
     setSelectedPlanId("");
+    setSelectedStartDate(new Date().toISOString().split("T")[0]);
+
     fetchAll();
   }
 
   async function saveEdit() {
+    if (!editingMember) return;
+
     if (!/^[A-Za-z ]{2,50}$/.test(editName)) {
       alert("Invalid name");
       return;
     }
 
     if (!/^[6-9]\d{9}$/.test(editPhone)) {
-      alert("Invalid phone number");
+      alert("Invalid phone");
       return;
     }
 
-    if (!editingMember) return;
+    let photoUrl = null;
+
+    if (editPhoto) {
+      photoUrl = await uploadPhoto(editPhoto);
+    }
+
+    // PLAN CHANGE
+    const selectedPlan = plans.find((p) => p.id == editPlanId);
+
+    let startDate = null;
+    let expiryDate = null;
+
+    if (selectedPlan) {
+      const today = new Date();
+      startDate = today.toLocaleDateString("en-CA");
+
+      const exp = new Date(today);
+      exp.setDate(exp.getDate() + selectedPlan.duration_days);
+      expiryDate = exp.toLocaleDateString("en-CA");
+    }
 
     if (editingMember.type === "single") {
+      const updateData = {
+        full_name: editName,
+        phone: editPhone,
+      };
+
+      if (photoUrl) updateData.photo_url = photoUrl;
+
+      if (selectedPlan) {
+        updateData.plan_id = selectedPlan.id;
+        updateData.plan_name = selectedPlan.name;
+        updateData.start_date = startDate;
+        updateData.expiry_date = expiryDate;
+      }
+
       await supabase
         .from("members")
-        .update({ full_name: editName, phone: editPhone })
+        .update(updateData)
         .eq("id", editingMember.id);
+
+      if (selectedPlan) {
+        await supabase.from("payments").insert({
+          source_type: "single_upgrade",
+          member_id: editingMember.id,
+          plan_id: selectedPlan.id,
+          plan_name: selectedPlan.name,
+          amount: selectedPlan.price,
+          payment_mode: "cash",
+        });
+      }
     } else {
+      // GROUP MEMBER UPDATE
+      const updateData = {
+        full_name: editName,
+        phone: editPhone,
+      };
+
+      if (photoUrl) updateData.photo_url = photoUrl;
+
       await supabase
         .from("group_members")
-        .update({ full_name: editName, phone: editPhone })
+        .update(updateData)
         .eq("id", editingMember.id);
+
+      if (selectedPlan) {
+        const group = groupMembers.find((g) =>
+          g.group_members.some((m) => m.id === editingMember.id),
+        );
+
+        await supabase
+          .from("membership_groups")
+          .update({
+            plan_id: selectedPlan.id,
+            plan_name: selectedPlan.name,
+            start_date: startDate,
+            expiry_date: expiryDate,
+          })
+          .eq("id", group.id);
+
+        await supabase.from("payments").insert({
+          source_type: "group_upgrade",
+          group_id: group.id,
+          plan_id: selectedPlan.id,
+          plan_name: selectedPlan.name,
+          amount: selectedPlan.price,
+          payment_mode: "cash",
+        });
+      }
     }
 
     setEditingMember(null);
+    setEditPhoto(null);
+    setEditPlanId("");
     fetchAll();
   }
+  async function saveGroupEdit() {
+    for (const m of editingGroup.group_members) {
+      let photoUrl = m.photo_url;
 
+      if (m.newPhoto) {
+        photoUrl = await uploadPhoto(m.newPhoto);
+      }
+
+      await supabase
+        .from("group_members")
+        .update({
+          full_name: m.full_name,
+          phone: m.phone,
+          photo_url: photoUrl,
+        })
+        .eq("id", m.id);
+    }
+
+    setEditingGroup(null);
+    fetchAll();
+  }
   async function deleteSingle(id) {
     if (!confirm("Delete this member?")) return;
     await supabase.from("members").delete().eq("id", id);
@@ -190,10 +308,8 @@ export default function AdminMembers() {
           <option value="expired">Expired</option>
         </select>
       </div>
-
       {/* ================= SINGLE MEMBERS ================= */}
       <h2 className="text-xl font-semibold mb-6">Single Members</h2>
-
       <div className="grid md:grid-cols-3 gap-8 mb-14">
         {applyFilter(singleMembers).map((m) => {
           const status = getStatus(m.expiry_date);
@@ -289,11 +405,9 @@ export default function AdminMembers() {
           );
         })}
       </div>
-
       {/* ================= GROUP MEMBERS ================= */}
       {/* ================= GROUP MEMBERS ================= */}
       <h2 className="text-xl font-semibold mb-6">Group Members</h2>
-
       <div className="grid md:grid-cols-3 gap-8">
         {applyFilter(groupMembers).map((g) => {
           const status = getStatus(g.expiry_date);
@@ -315,201 +429,80 @@ export default function AdminMembers() {
                 className={`absolute left-0 top-0 h-full w-2 bg-gradient-to-b ${accent}`}
               />
 
-              <div
-                className="cursor-pointer"
-                onClick={() => setSelectedMember({ ...g, type: "group" })}
-              >
-                <h3 className="font-semibold mb-3 text-lg">{g.plan_name}</h3>
+              <h3 className="font-semibold mb-3 text-lg">{g.plan_name}</h3>
 
-                {/* GROUP MEMBERS PREVIEW */}
-                <div className="space-y-3 mb-4">
-                  {g.group_members.map((m) => (
-                    <div key={m.id} className="flex items-center gap-3">
-                      <img
-                        src={
-                          m.photo_url ||
-                          `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                            m.full_name,
-                          )}`
-                        }
-                        className="w-10 h-10 rounded-full"
-                      />
-                      <span className="text-sm">
-                        {m.is_primary && "👑 "}
-                        {m.full_name}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                <span
-                  className={`px-3 py-1 text-xs rounded-full font-semibold text-white
-            ${
-              status === "active"
-                ? "bg-emerald-600"
-                : status === "due"
-                  ? "bg-amber-500"
-                  : "bg-rose-600"
-            }`}
-                >
-                  {status.toUpperCase()}
-                </span>
+              {/* PLAN INFO */}
+              <div className="text-sm text-slate-600 mb-4">
+                <div>Start: {g.start_date}</div>
+                <div>Expiry: {g.expiry_date}</div>
               </div>
 
-              {(status === "expired" || status === "due") && (
-                <button
-                  onClick={() => setRenewTarget({ type: "group", data: g })}
-                  className="mt-4 w-full bg-indigo-600 text-white py-2 rounded-xl"
-                >
-                  Renew Group
-                </button>
-              )}
+              {/* GROUP MEMBERS */}
+              <div className="space-y-3 mb-4">
+                {g.group_members.map((m) => (
+                  <div
+                    key={m.id}
+                    onClick={() => {
+                      setEditingMember({ id: m.id, type: "group" });
+                      setEditName(m.full_name);
+                      setEditPhone(m.phone);
+                    }}
+                    className="flex items-center gap-3 cursor-pointer"
+                  >
+                    <img
+                      src={
+                        m.photo_url ||
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                          m.full_name,
+                        )}`
+                      }
+                      className="w-10 h-10 rounded-full"
+                    />
 
-              <button
-                onClick={() => deleteGroup(g.id)}
-                className="mt-3 w-full bg-red-600 text-white py-2 rounded-xl"
+                    <span className="text-sm">
+                      {m.is_primary && "👑 "}
+                      {m.full_name}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <span
+                className={`px-3 py-1 text-xs rounded-full font-semibold text-white
+    ${
+      status === "active"
+        ? "bg-emerald-600"
+        : status === "due"
+          ? "bg-amber-500"
+          : "bg-rose-600"
+    }`}
               >
-                Delete Group
-              </button>
+                {status.toUpperCase()}
+              </span>
+
+              {/* BUTTONS */}
+              <div className="flex gap-2 mt-4">
+                <button
+                  onClick={() => setEditingGroup(g)}
+                  className="flex-1 bg-yellow-500 text-white py-2 rounded-xl"
+                >
+                  Edit Group
+                </button>
+
+                <button
+                  onClick={() => deleteGroup(g.id)}
+                  className="flex-1 bg-red-600 text-white py-2 rounded-xl"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           );
         })}
       </div>
-
-      {/* ================= DETAILS MODAL ================= */}
-      {selectedMember && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white w-[600px] rounded-3xl p-10 shadow-2xl animate-scaleIn relative">
-            <button
-              onClick={() => setSelectedMember(null)}
-              className="absolute top-5 right-5 text-slate-400 hover:text-black"
-            >
-              ✕
-            </button>
-
-            {/* SINGLE MEMBER DETAILS */}
-            {selectedMember.type === "single" && (
-              <>
-                <div className="flex flex-col items-center text-center mb-8">
-                  <img
-                    src={
-                      selectedMember.photo_url ||
-                      `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                        selectedMember.full_name,
-                      )}&size=200`
-                    }
-                    className="w-28 h-28 rounded-full mb-4"
-                  />
-                  <h2 className="text-2xl font-bold">
-                    {selectedMember.full_name}
-                  </h2>
-                  <p className="text-slate-500">{selectedMember.phone}</p>
-                </div>
-
-                <div className="space-y-4 text-sm text-slate-700">
-                  <div className="flex justify-between border-b pb-2">
-                    <span className="font-medium">Plan</span>
-                    <span>{selectedMember.plan_name}</span>
-                  </div>
-
-                  <div className="flex justify-between border-b pb-2">
-                    <span className="font-medium">Start Date</span>
-                    <span>{selectedMember.start_date}</span>
-                  </div>
-
-                  <div className="flex justify-between border-b pb-2">
-                    <span className="font-medium">Expiry Date</span>
-                    <span>{selectedMember.expiry_date}</span>
-                  </div>
-
-                  <div className="flex justify-between">
-                    <span className="font-medium">Status</span>
-                    <span
-                      className={`font-semibold
-                ${
-                  getStatus(selectedMember.expiry_date) === "active"
-                    ? "text-emerald-600"
-                    : getStatus(selectedMember.expiry_date) === "due"
-                      ? "text-amber-500"
-                      : "text-rose-600"
-                }`}
-                    >
-                      {getStatus(selectedMember.expiry_date).toUpperCase()}
-                    </span>
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* GROUP DETAILS */}
-            {selectedMember.type === "group" && (
-              <>
-                <h2 className="text-2xl font-bold mb-6 text-center">
-                  {selectedMember.plan_name}
-                </h2>
-
-                <div className="space-y-4 text-sm text-slate-700 mb-6">
-                  <div className="flex justify-between border-b pb-2">
-                    <span className="font-medium">Start Date</span>
-                    <span>{selectedMember.start_date}</span>
-                  </div>
-
-                  <div className="flex justify-between border-b pb-2">
-                    <span className="font-medium">Expiry Date</span>
-                    <span>{selectedMember.expiry_date}</span>
-                  </div>
-
-                  <div className="flex justify-between">
-                    <span className="font-medium">Status</span>
-                    <span
-                      className={`font-semibold
-                ${
-                  getStatus(selectedMember.expiry_date) === "active"
-                    ? "text-emerald-600"
-                    : getStatus(selectedMember.expiry_date) === "due"
-                      ? "text-amber-500"
-                      : "text-rose-600"
-                }`}
-                    >
-                      {getStatus(selectedMember.expiry_date).toUpperCase()}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  {selectedMember.group_members.map((m) => (
-                    <div
-                      key={m.id}
-                      className="flex items-center gap-4 p-3 bg-slate-50 rounded-xl"
-                    >
-                      <img
-                        src={
-                          m.photo_url ||
-                          `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                            m.full_name,
-                          )}`
-                        }
-                        className="w-12 h-12 rounded-full"
-                      />
-                      <div>
-                        <div className="font-medium">
-                          {m.is_primary && "👑 "}
-                          {m.full_name}
-                        </div>
-                        <div className="text-sm text-slate-500">{m.phone}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-
       {/* ================= EDIT MODAL ================= */}
       {editingMember && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-2xl w-96 shadow-xl">
             <h3 className="font-semibold mb-4">Edit Member</h3>
 
@@ -520,10 +513,29 @@ export default function AdminMembers() {
             />
 
             <input
-              className="border w-full px-3 py-2 mb-4 rounded-lg"
+              className="border w-full px-3 py-2 mb-3 rounded-lg"
               value={editPhone}
               onChange={(e) => setEditPhone(e.target.value)}
             />
+
+            <input
+              type="file"
+              onChange={(e) => setEditPhoto(e.target.files[0])}
+              className="border w-full px-3 py-2 mb-3 rounded-lg"
+            />
+
+            <select
+              value={editPlanId}
+              onChange={(e) => setEditPlanId(e.target.value)}
+              className="border w-full px-3 py-2 mb-4 rounded-lg"
+            >
+              <option value="">Keep Current Plan</option>
+              {plans.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name} – ₹{p.price}
+                </option>
+              ))}
+            </select>
 
             <button
               onClick={saveEdit}
@@ -542,6 +554,12 @@ export default function AdminMembers() {
               Select Plan for Renewal
             </h3>
 
+            <input
+              type="date"
+              value={selectedStartDate}
+              onChange={(e) => setSelectedStartDate(e.target.value)}
+              className="border w-full px-3 py-2 mb-4 rounded-lg"
+            />
             <select
               value={selectedPlanId}
               onChange={(e) => setSelectedPlanId(e.target.value)}
@@ -573,6 +591,46 @@ export default function AdminMembers() {
                 Cancel
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {/* ==========group edit modal ================= */}
+      {editingGroup && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-3xl p-8 w-[500px] shadow-2xl">
+            <h2 className="text-xl font-semibold mb-6">Edit Group Members</h2>
+
+            {editingGroup.group_members.map((m, i) => (
+              <div key={m.id} className="border p-4 rounded-xl mb-4">
+                <div className="font-medium mb-2">
+                  {m.is_primary ? "Primary Member" : `Member ${i + 1}`}
+                </div>
+
+                <input
+                  defaultValue={m.full_name}
+                  onChange={(e) => (m.full_name = e.target.value)}
+                  className="border px-3 py-2 rounded w-full mb-2"
+                />
+
+                <input
+                  defaultValue={m.phone}
+                  onChange={(e) => (m.phone = e.target.value)}
+                  className="border px-3 py-2 rounded w-full mb-2"
+                />
+
+                <input
+                  type="file"
+                  onChange={(e) => (m.newPhoto = e.target.files[0])}
+                />
+              </div>
+            ))}
+
+            <button
+              onClick={saveGroupEdit}
+              className="w-full bg-indigo-600 text-white py-2 rounded-xl"
+            >
+              Save Changes
+            </button>
           </div>
         </div>
       )}

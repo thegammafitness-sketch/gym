@@ -99,7 +99,9 @@ export default function AdminLayout() {
             <SidebarLink to="/admin/sales" collapsed={collapsed}>
               💰 Sales
             </SidebarLink>
-
+            <SidebarLink to="/admin/due-payments" collapsed={collapsed}>
+              ⚠️ Due Payments
+            </SidebarLink>
             <button
               onClick={logout}
               className="mt-10 text-red-500 font-semibold hover:text-red-700 transition"

@@ -9,7 +9,7 @@ import AdminMembers from "./AdminMembers";
 import AdminAddMember from "./AdminAddMember";
 import AdminAttendance from "./AdminAttendance";
 import AdminSales from "./AdminSales";
-
+import AdminDuePayments from "./AdminDuePayments";
 export default function AdminRoutes() {
   const [session, setSession] = useState(undefined);
 
@@ -46,6 +46,7 @@ export default function AdminRoutes() {
         <Route path="add-member" element={<AdminAddMember />} />
         <Route path="attendance" element={<AdminAttendance />} />
         <Route path="sales" element={<AdminSales />} />
+        <Route path="due-payments" element={<AdminDuePayments />} />
       </Route>
     </Routes>
   );

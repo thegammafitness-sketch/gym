@@ -323,7 +323,7 @@ export default function AdminSales() {
   const [mode, setMode] = useState("today");
   const [month, setMonth] = useState(new Date().getMonth());
   const [year, setYear] = useState(new Date().getFullYear());
-
+  const [paymentMode, setPaymentMode] = useState("all");
   const [summary, setSummary] = useState({
     today: 0,
     month: 0,
@@ -338,7 +338,7 @@ export default function AdminSales() {
 
   useEffect(() => {
     loadChart();
-  }, [mode, month, year]);
+  }, [mode, month, year, paymentMode]);
 
   async function loadSummary() {
     const now = new Date();
@@ -401,11 +401,17 @@ export default function AdminSales() {
       end = new Date(year + 1, 0, 1);
     }
 
-    const { data } = await supabase
+    let query = supabase
       .from("payments")
-      .select("amount, created_at")
+      .select("amount, created_at, payment_mode")
       .gte("created_at", start.toISOString())
       .lt("created_at", end.toISOString());
+
+    if (paymentMode !== "all") {
+      query = query.eq("payment_mode", paymentMode);
+    }
+
+    const { data } = await query;
 
     if (mode === "year") {
       const map = {};
@@ -500,6 +506,16 @@ export default function AdminSales() {
                   {y}
                 </option>
               ))}
+            </select>
+            <select
+              value={paymentMode}
+              onChange={(e) => setPaymentMode(e.target.value)}
+              className="px-4 py-2 rounded-xl border"
+            >
+              <option value="all">All Payments</option>
+              <option value="cash">Cash</option>
+              <option value="upi">UPI</option>
+              <option value="card">Card</option>
             </select>
           </>
         )}
