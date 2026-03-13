@@ -168,22 +168,18 @@ export default function AdminMembers() {
       photoUrl = await uploadPhoto(editPhoto);
     }
 
-    // PLAN CHANGE
     const selectedPlan = plans.find((p) => p.id == editPlanId);
 
-    let startDate = null;
+    let upgradeAmount = 0;
     let expiryDate = null;
 
-    if (selectedPlan) {
-      const today = new Date();
-      startDate = today.toLocaleDateString("en-CA");
-
-      const exp = new Date(today);
-      exp.setDate(exp.getDate() + selectedPlan.duration_days);
-      expiryDate = exp.toLocaleDateString("en-CA");
-    }
+    /* ================= SINGLE MEMBER ================= */
 
     if (editingMember.type === "single") {
+      const currentMember = singleMembers.find(
+        (m) => m.id === editingMember.id,
+      );
+
       const updateData = {
         full_name: editName,
         phone: editPhone,
@@ -192,9 +188,29 @@ export default function AdminMembers() {
       if (photoUrl) updateData.photo_url = photoUrl;
 
       if (selectedPlan) {
+        const currentPlan = plans.find((p) => p.id === currentMember.plan_id);
+
+        const currentPrice = currentPlan ? currentPlan.price : 0;
+        const newPrice = selectedPlan.price;
+
+        upgradeAmount = newPrice - currentPrice;
+
+        if (upgradeAmount < 0) {
+          alert("Downgrade not allowed");
+          return;
+        }
+
+        const startDateObj = new Date(currentMember.start_date);
+
+        const expiryDateObj = new Date(startDateObj);
+
+        expiryDateObj.setDate(
+          expiryDateObj.getDate() + selectedPlan.duration_days,
+        );
+        expiryDate = expiryDateObj.toLocaleDateString("en-CA");
+
         updateData.plan_id = selectedPlan.id;
         updateData.plan_name = selectedPlan.name;
-        updateData.start_date = startDate;
         updateData.expiry_date = expiryDate;
       }
 
@@ -209,12 +225,12 @@ export default function AdminMembers() {
           member_id: editingMember.id,
           plan_id: selectedPlan.id,
           plan_name: selectedPlan.name,
-          amount: selectedPlan.price,
+          amount: upgradeAmount,
           payment_mode: "cash",
         });
       }
     } else {
-      // GROUP MEMBER UPDATE
+      /* ================= GROUP MEMBER ================= */
       const updateData = {
         full_name: editName,
         phone: editPhone,
@@ -232,12 +248,33 @@ export default function AdminMembers() {
           g.group_members.some((m) => m.id === editingMember.id),
         );
 
+        const currentPlan = plans.find((p) => p.id === group.plan_id);
+
+        const currentPrice = currentPlan ? currentPlan.price : 0;
+        const newPrice = selectedPlan.price;
+
+        upgradeAmount = newPrice - currentPrice;
+
+        if (upgradeAmount < 0) {
+          alert("Downgrade not allowed");
+          return;
+        }
+
+        const startDateObj = new Date(group.start_date);
+
+        const expiryDateObj = new Date(startDateObj);
+
+        expiryDateObj.setDate(
+          expiryDateObj.getDate() + selectedPlan.duration_days,
+        );
+
+        expiryDate = expiryDateObj.toLocaleDateString("en-CA");
+
         await supabase
           .from("membership_groups")
           .update({
             plan_id: selectedPlan.id,
             plan_name: selectedPlan.name,
-            start_date: startDate,
             expiry_date: expiryDate,
           })
           .eq("id", group.id);
@@ -247,7 +284,7 @@ export default function AdminMembers() {
           group_id: group.id,
           plan_id: selectedPlan.id,
           plan_name: selectedPlan.name,
-          amount: selectedPlan.price,
+          amount: upgradeAmount,
           payment_mode: "cash",
         });
       }
@@ -256,6 +293,7 @@ export default function AdminMembers() {
     setEditingMember(null);
     setEditPhoto(null);
     setEditPlanId("");
+
     fetchAll();
   }
   async function saveGroupEdit() {
