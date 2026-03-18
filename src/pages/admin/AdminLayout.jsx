@@ -39,7 +39,6 @@
 //   );
 // }
 
-
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { supabase } from "../../supabase";
 import { useState } from "react";
@@ -55,9 +54,7 @@ export default function AdminLayout() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-200 p-6">
-
       <div className="flex rounded-3xl overflow-hidden shadow-2xl bg-white">
-
         {/* SIDEBAR */}
         <aside
           className={`${
@@ -79,7 +76,6 @@ export default function AdminLayout() {
           </div>
 
           <nav className="flex flex-col gap-4 text-slate-600 font-medium">
-
             <SidebarLink to="/admin/members" collapsed={collapsed}>
               👥 Members
             </SidebarLink>
@@ -109,18 +105,14 @@ export default function AdminLayout() {
               {!collapsed && "Logout"}
               {collapsed && "🚪"}
             </button>
-
           </nav>
         </aside>
 
         {/* MAIN CONTENT */}
         <div className="flex-1 bg-slate-50">
-
           {/* TOP BAR */}
           <div className="flex justify-between items-center px-8 py-6 border-b bg-white/70 backdrop-blur">
-            <h1 className="text-xl font-semibold text-slate-700">
-              Dashboard
-            </h1>
+            <h1 className="text-xl font-semibold text-slate-700">Dashboard</h1>
 
             <div className="flex items-center gap-4">
               <div className="bg-slate-200 w-10 h-10 rounded-full flex items-center justify-center">
@@ -133,7 +125,6 @@ export default function AdminLayout() {
           <div className="p-8">
             <Outlet />
           </div>
-
         </div>
       </div>
     </div>
@@ -162,18 +153,15 @@ function SidebarLink({ to, children, collapsed }) {
               ? "bg-indigo-600 text-white w-12 h-12 mx-auto flex items-center justify-center shadow-lg"
               : "bg-indigo-600 text-white shadow-lg"
             : collapsed
-            ? "w-12 h-12 mx-auto flex items-center justify-center hover:bg-slate-200"
-            : "text-slate-600 hover:bg-slate-100"
+              ? "w-12 h-12 mx-auto flex items-center justify-center hover:bg-slate-200"
+              : "text-slate-600 hover:bg-slate-100"
         }
         `
       }
     >
       <span className="text-lg">{icon}</span>
 
-      {!collapsed && (
-        <span className="font-medium">{label}</span>
-      )}
+      {!collapsed && <span className="font-medium">{label}</span>}
     </NavLink>
   );
 }
-
