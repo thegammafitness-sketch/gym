@@ -833,6 +833,7 @@ export default function AdminAddMember() {
             phone: m.phone,
             photo_url: photoUrl,
             is_primary: m.is_primary,
+            whatsapp_opt_in: true,
           });
         }
 
