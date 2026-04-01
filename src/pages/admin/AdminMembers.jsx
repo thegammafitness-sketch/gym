@@ -727,14 +727,16 @@ export default function AdminMembers() {
   }
 
   function getStatus(expiry) {
-    const today = new Date();
-    const exp = new Date(expiry);
-    const diff = Math.ceil((exp - today) / 86400000);
-    if (diff < 0) return "expired";
-    if (diff <= 2) return "due";
-    return "active";
-  }
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const exp = new Date(expiry);
+  exp.setHours(0, 0, 0, 0);
+  const diff = Math.ceil((exp - today) / 86400000);
 
+  if (diff <= 0) return "expired"; // ← aaj ya pehle = expired
+  if (diff <= 2) return "due";
+  return "active";
+}
   // ← updated to also apply search
   function applyFilter(list, type = "single") {
     let result = list;
