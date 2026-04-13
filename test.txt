@@ -1,0 +1,902 @@
+[
+  {
+    "event_message": "shutdown",
+    "event_type": "Shutdown",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "edffa910-ef09-4af9-8364-fb2e4a24d8f3",
+    "level": "log",
+    "timestamp": 1775034075911000
+  },
+  {
+    "event_message": "=== DONE === {\"due_sent\":0,\"due_failed\":0,\"expired_sent\":19,\"expired_failed\":0,\"skipped\":0}\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "64faa95c-31cd-48d8-aa65-4c194d5531ac",
+    "level": "info",
+    "timestamp": 1775034009382000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 919618329007: wamid.HBgMOTE5NjE4MzI5MDA3FQIAERgSOTEwRTdDQ0VCMEM3REU0QUI2AA==\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "40be5e85-db03-4347-b50e-03c1b180267a",
+    "level": "info",
+    "timestamp": 1775034009382000
+  },
+  {
+    "event_message": "Supabase returned 1 rows\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "ee6aa661-1f34-43d9-a054-68bf69e56e86",
+    "level": "info",
+    "timestamp": 1775034009023000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 919618329007 (Sushil)\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "bab91cb3-a75c-4f25-9a72-a8225862084b",
+    "level": "info",
+    "timestamp": 1775034009023000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 918125100952: wamid.HBgMOTE4MTI1MTAwOTUyFQIAERgSQjA4Qzk5OEIxRTYwNzUzOTZBAA==\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "98fdde0d-c0bf-4b0f-89fd-cef345fce455",
+    "level": "info",
+    "timestamp": 1775034008986000
+  },
+  {
+    "event_message": "Supabase query: https://ypvjmesupjdbchfgjykl.supabase.co/rest/v1/group_members?group_id=eq.1f1a38d1-2e03-499c-b328-3046de186f74&is_primary=eq.true&whatsapp_opt_in=eq.true&select=full_name,phone\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "42a7f6a9-c60b-46d4-97fe-4ffcd16749dd",
+    "level": "info",
+    "timestamp": 1775034008986000
+  },
+  {
+    "event_message": "Supabase returned 1 rows\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "5609f062-2e7f-4653-8ec3-276a133e82a0",
+    "level": "info",
+    "timestamp": 1775034008589000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 918125100952 (Nikhil )\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "cd7dda1d-8714-4755-91a3-1393580d572d",
+    "level": "info",
+    "timestamp": 1775034008589000
+  },
+  {
+    "event_message": "Supabase query: https://ypvjmesupjdbchfgjykl.supabase.co/rest/v1/group_members?group_id=eq.bf344222-3bfd-4220-b2c3-747051d12825&is_primary=eq.true&whatsapp_opt_in=eq.true&select=full_name,phone\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "bced59f7-e026-4fa7-bcb1-13629f658379",
+    "level": "info",
+    "timestamp": 1775034008554000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 917981707793: wamid.HBgMOTE3OTgxNzA3NzkzFQIAERgSMDRFMDgxRDBCNDFENDgxQjhDAA==\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "e320df81-e3dc-4aa7-a49b-c18c4ae93c74",
+    "level": "info",
+    "timestamp": 1775034008554000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 917981707793 (Priyanka)\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "5c36aaf6-4be2-424d-8754-55fd46c0a296",
+    "level": "info",
+    "timestamp": 1775034008172000
+  },
+  {
+    "event_message": "Supabase returned 1 rows\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "5b1b4f69-4419-479a-a39f-0982d0bbfdb1",
+    "level": "info",
+    "timestamp": 1775034008172000
+  },
+  {
+    "event_message": "Supabase query: https://ypvjmesupjdbchfgjykl.supabase.co/rest/v1/group_members?group_id=eq.cb5a8f48-abd6-4682-9d94-39fb341505df&is_primary=eq.true&whatsapp_opt_in=eq.true&select=full_name,phone\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "53f24d48-e413-4ff3-ab1a-f465336d4fc6",
+    "level": "info",
+    "timestamp": 1775034008123000
+  },
+  {
+    "event_message": "Supabase returned 3 rows\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "aa529888-9e0c-4ed3-92d7-199c540486ca",
+    "level": "info",
+    "timestamp": 1775034008123000
+  },
+  {
+    "event_message": "Supabase returned 0 rows\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "14c9a544-a878-4195-8041-390b31fec0ed",
+    "level": "info",
+    "timestamp": 1775034008088000
+  },
+  {
+    "event_message": "Supabase query: https://ypvjmesupjdbchfgjykl.supabase.co/rest/v1/membership_groups?expiry_date=eq.2026-04-01&select=id,expiry_date\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "29ef2a3f-eb09-4d13-a355-59032e198611",
+    "level": "info",
+    "timestamp": 1775034008088000
+  },
+  {
+    "event_message": "Supabase query: https://ypvjmesupjdbchfgjykl.supabase.co/rest/v1/membership_groups?expiry_date=eq.2026-04-03&select=id,expiry_date\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "ef7362d5-d0df-46c3-97af-561c06028cb8",
+    "level": "info",
+    "timestamp": 1775034008051000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 918099256185: wamid.HBgMOTE4MDk5MjU2MTg1FQIAERgSQ0E0MjQzQkFEODlDMzM0Qzg1AA==\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "4498799f-f401-4471-a98c-64093d399e9b",
+    "level": "info",
+    "timestamp": 1775034008051000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 918099256185 (Sandeep)\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "1e9b0b37-45d7-4800-9b36-d1fd2b7e1052",
+    "level": "info",
+    "timestamp": 1775034007693000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 918143202159: wamid.HBgMOTE4MTQzMjAyMTU5FQIAERgSRjJCOEEyNkVERDU2Q0E5QkU3AA==\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "a4396270-6447-49dd-8cce-a1ed217c3ed7",
+    "level": "info",
+    "timestamp": 1775034007693000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 918143202159 (Raju)\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "b7e74200-8952-499a-ac2d-a0b133260c68",
+    "level": "info",
+    "timestamp": 1775034007285000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 918247377665: wamid.HBgMOTE4MjQ3Mzc3NjY1FQIAERgSRUZFMzhDMkNFNDVGRDkxQUNBAA==\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "4e7439a3-d4c2-4789-8f76-0a9208c0412f",
+    "level": "info",
+    "timestamp": 1775034007285000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 918247377665 (Abhinav )\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "bba50515-0ffc-4a89-ba2f-388888861992",
+    "level": "info",
+    "timestamp": 1775034006884000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 919701130690: wamid.HBgMOTE5NzAxMTMwNjkwFQIAERgSNUVEOUQzOTQxQjJEOTNFRkZFAA==\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "fe722c59-ce33-45f5-ad6b-6989ad7bd1d7",
+    "level": "info",
+    "timestamp": 1775034006884000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 919701130690 (V Tarun )\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "3529077b-ebf9-4aea-817f-072f9290c068",
+    "level": "info",
+    "timestamp": 1775034006488000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 918247504527: wamid.HBgMOTE4MjQ3NTA0NTI3FQIAERgSQjdDNTgwQzA2QjhDMDRBRDc1AA==\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "ca2ffd08-2375-454d-8de7-a8aa02d0d33c",
+    "level": "info",
+    "timestamp": 1775034006487000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 918247504527 (Kadin)\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "56e45ccf-c937-4354-af2a-34c1eb7d92e9",
+    "level": "info",
+    "timestamp": 1775034006126000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 917013782678: wamid.HBgMOTE3MDEzNzgyNjc4FQIAERgSOUVFNEU1MDQxMzg3QkI0QzQ2AA==\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "0cc83537-2e52-4e09-9983-4e4c3a91dd24",
+    "level": "info",
+    "timestamp": 1775034006126000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 919014861735: wamid.HBgMOTE5MDE0ODYxNzM1FQIAERgSMEY1Rjg5NDhEQjU1QjhCQjcxAA==\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "f189fb53-8190-4e4e-9686-ee47e9dd456a",
+    "level": "info",
+    "timestamp": 1775034005757000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 917013782678 (Delwin )\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "51243f77-af2a-4e61-a347-cd38b2763e79",
+    "level": "info",
+    "timestamp": 1775034005757000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 919014861735 (Naveen )\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "16d0feed-01e9-480b-9caa-123284144126",
+    "level": "info",
+    "timestamp": 1775034005379000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 919281431852: wamid.HBgMOTE5MjgxNDMxODUyFQIAERgSRDE5MjQ4NzhENThFOEUzQzYwAA==\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "bff7e25f-531c-4582-9da0-f2f8b26595f9",
+    "level": "info",
+    "timestamp": 1775034005379000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 919281431852 (Kamlesh Kumar)\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "2ea20f3b-af37-4318-91db-9dee87c2d0fb",
+    "level": "info",
+    "timestamp": 1775034004990000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 916303813960: wamid.HBgMOTE2MzAzODEzOTYwFQIAERgSMTM2MEEwQUYyNTdDNzJCNzNFAA==\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "b695dc24-0ef1-4497-9721-ef8555473e77",
+    "level": "info",
+    "timestamp": 1775034004990000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 916303813960 (Akhil)\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "74b71730-60d4-49f9-9f42-3a62d6ec5b87",
+    "level": "info",
+    "timestamp": 1775034004637000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 918886559369: wamid.HBgMOTE4ODg2NTU5MzY5FQIAERgSQkUxNDFBNDVDOTRCMTc0RkRCAA==\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "51223288-935c-4414-abba-325658a77483",
+    "level": "info",
+    "timestamp": 1775034004636000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 919948674787: wamid.HBgMOTE5OTQ4Njc0Nzg3FQIAERgSNUUwRjczMUE2MDgxOTIyREUyAA==\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "8119c9c0-757f-42c2-929b-c683eb0df3fa",
+    "level": "info",
+    "timestamp": 1775034004254000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 918886559369 (Naresh)\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "7cc283b4-084e-4cd8-a02d-b293cbc6f1ca",
+    "level": "info",
+    "timestamp": 1775034004254000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 919948674787 (Priya)\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "31bbb716-3e0e-49de-916b-d300091dc748",
+    "level": "info",
+    "timestamp": 1775034003887000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 917893213662: wamid.HBgMOTE3ODkzMjEzNjYyFQIAERgSQjg3OUQwRUVFRDU2NTJBMkQzAA==\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "06f469a4-af86-4213-9b0e-ac11fd38b6f6",
+    "level": "info",
+    "timestamp": 1775034003887000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 917893213662 (Tarun Tej )\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "9b400e3b-7b90-44f0-9bd1-a1d5a1bacd00",
+    "level": "info",
+    "timestamp": 1775034003481000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 917306497343: wamid.HBgMOTE3MzA2NDk3MzQzFQIAERgSMUZEQkVCMUQ5MzREMTM0ODZBAA==\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "c6e369a3-593b-4043-9757-066db538915f",
+    "level": "info",
+    "timestamp": 1775034003481000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 919949018890: wamid.HBgMOTE5OTQ5MDE4ODkwFQIAERgSOTNBNzExNTU2NEJEQTUyNTRFAA==\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "1c83f216-f9b9-4056-8238-0af2e00f51b4",
+    "level": "info",
+    "timestamp": 1775034003089000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 917306497343 (Dheeraj)\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "12d4ee1f-4706-4a8e-8744-96a782a5cf42",
+    "level": "info",
+    "timestamp": 1775034003089000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 919949018890 (Charan Tej )\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "b35623cf-81b1-4b7f-9b16-c5f0ee759786",
+    "level": "info",
+    "timestamp": 1775034002732000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 9100232650: wamid.HBgMOTE5MTAwMjMyNjUwFQIAERgSNkMwQjkwMEJFQjU1NTE4MTE4AA==\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "689b25c2-168b-4543-b0af-329114b1c406",
+    "level": "info",
+    "timestamp": 1775034002732000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 917036121234: wamid.HBgMOTE3MDM2MTIxMjM0FQIAERgSMzM5RTQ1REU0RkEwRDQ2QkY0AA==\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "3bda357f-ebf8-4ed3-9ed5-d5da3e7f8c08",
+    "level": "info",
+    "timestamp": 1775034002367000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 9100232650 (Raj)\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "9f7677d3-b240-4cbe-9526-1bfbaaae6c3b",
+    "level": "info",
+    "timestamp": 1775034002367000
+  },
+  {
+    "event_message": "Supabase returned 16 rows\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "c493b1af-7779-4a75-817b-eb41fa62b884",
+    "level": "info",
+    "timestamp": 1775034001832000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 917036121234 (Wincent)\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "ae344399-fbfa-474b-aaeb-f8356e9430a4",
+    "level": "info",
+    "timestamp": 1775034001832000
+  },
+  {
+    "event_message": "Supabase returned 0 rows\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "1488968a-c902-4813-af09-edae2a040de7",
+    "level": "info",
+    "timestamp": 1775034001697000
+  },
+  {
+    "event_message": "Supabase query: https://ypvjmesupjdbchfgjykl.supabase.co/rest/v1/members?expiry_date=eq.2026-04-01&whatsapp_opt_in=eq.true&select=full_name,phone,expiry_date\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "6976879b-05b2-4dcb-8a06-a627e51fbaf3",
+    "level": "info",
+    "timestamp": 1775034001697000
+  },
+  {
+    "event_message": "=== send-membership-reminders started ===\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "110a4184-21c2-44cc-9209-303c4e24a100",
+    "level": "info",
+    "timestamp": 1775034000901000
+  },
+  {
+    "event_message": "Supabase query: https://ypvjmesupjdbchfgjykl.supabase.co/rest/v1/members?expiry_date=eq.2026-04-03&whatsapp_opt_in=eq.true&select=full_name,phone,expiry_date\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "30af935f-552a-466f-b234-a88366727ae3",
+    "level": "info",
+    "timestamp": 1775034000901000
+  },
+  {
+    "event_message": "Expired date checking: 2026-04-01\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "0a554bc1-4ec4-4572-9ef9-45537e58a342",
+    "level": "info",
+    "timestamp": 1775034000901000
+  },
+  {
+    "event_message": "Due date checking: 2026-04-03\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "201d7d6d-2937-4695-86c3-a69e8477b60d",
+    "level": "info",
+    "timestamp": 1775034000901000
+  },
+  {
+    "event_message": "Listening on http://localhost:9999/\n",
+    "event_type": "Log",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "17554d0d-c3b7-40c4-aa6a-a96dc8ed2a22",
+    "level": "info",
+    "timestamp": 1775034000898000
+  },
+  {
+    "event_message": "booted (time: 41ms)",
+    "event_type": "Boot",
+    "execution_id": "981b7c19-1ba2-493e-aec2-7192cfe38915",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "aa28104b-1a62-413b-ba2a-7b2c55c58011",
+    "level": "log",
+    "timestamp": 1775034000897000
+  },
+  {
+    "event_message": "shutdown",
+    "event_type": "Shutdown",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "0da21a87-eb3c-44aa-855c-dd01b982aa9e",
+    "level": "log",
+    "timestamp": 1775032842944000
+  },
+  {
+    "event_message": "=== DONE === {\"due_sent\":0,\"due_failed\":0,\"expired_sent\":19,\"expired_failed\":0,\"skipped\":0}\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "244e78a9-f071-4a97-9f55-02afd85ae468",
+    "level": "info",
+    "timestamp": 1775032777295000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 919618329007: wamid.HBgMOTE5NjE4MzI5MDA3FQIAERgSRkJGNDZDMzU2REY5MTEwNkExAA==\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "8e41d60f-7124-49aa-b043-1f64b385ecb9",
+    "level": "info",
+    "timestamp": 1775032777295000
+  },
+  {
+    "event_message": "Supabase returned 1 rows\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "fd75ac1c-3366-47fb-a19e-3e518954b4ea",
+    "level": "info",
+    "timestamp": 1775032776890000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 919618329007 (Sushil)\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "011a3ed7-2086-42d7-aea0-12687a7416aa",
+    "level": "info",
+    "timestamp": 1775032776890000
+  },
+  {
+    "event_message": "Supabase query: https://ypvjmesupjdbchfgjykl.supabase.co/rest/v1/group_members?group_id=eq.1f1a38d1-2e03-499c-b328-3046de186f74&is_primary=eq.true&whatsapp_opt_in=eq.true&select=full_name,phone\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "aa398c34-f7b9-4b7e-9f9a-8bb288882bdb",
+    "level": "info",
+    "timestamp": 1775032776846000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 918125100952: wamid.HBgMOTE4MTI1MTAwOTUyFQIAERgSRTU3NTYxMzdBOEEyRjkwNUNEAA==\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "025208f0-490c-451b-b6fc-0eb0b00aa37c",
+    "level": "info",
+    "timestamp": 1775032776846000
+  },
+  {
+    "event_message": "Supabase returned 1 rows\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "dc0e75f2-6114-4116-b8b9-a44230854d1d",
+    "level": "info",
+    "timestamp": 1775032776390000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 918125100952 (Nikhil )\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "9a1e8294-5f6b-42c0-bb45-060afc45e1ea",
+    "level": "info",
+    "timestamp": 1775032776390000
+  },
+  {
+    "event_message": "Supabase query: https://ypvjmesupjdbchfgjykl.supabase.co/rest/v1/group_members?group_id=eq.bf344222-3bfd-4220-b2c3-747051d12825&is_primary=eq.true&whatsapp_opt_in=eq.true&select=full_name,phone\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "a0d95337-047d-411c-a0f9-a7423b59539d",
+    "level": "info",
+    "timestamp": 1775032776350000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 917981707793: wamid.HBgMOTE3OTgxNzA3NzkzFQIAERgSMjZGMUM2RUNBQUJDMzE3OTI2AA==\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "af4d74bb-4f60-4024-9c22-9fbbdb6ae31c",
+    "level": "info",
+    "timestamp": 1775032776350000
+  },
+  {
+    "event_message": "Supabase returned 1 rows\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "0053e21f-fab6-442c-9770-239e5a786e40",
+    "level": "info",
+    "timestamp": 1775032775920000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 917981707793 (Priyanka)\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "9b654947-9bec-4a71-b6cc-c1d6ee72972a",
+    "level": "info",
+    "timestamp": 1775032775920000
+  },
+  {
+    "event_message": "Supabase returned 3 rows\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "5acfb127-1367-416f-9d5a-69ae52a5f47d",
+    "level": "info",
+    "timestamp": 1775032775749000
+  },
+  {
+    "event_message": "Supabase query: https://ypvjmesupjdbchfgjykl.supabase.co/rest/v1/group_members?group_id=eq.cb5a8f48-abd6-4682-9d94-39fb341505df&is_primary=eq.true&whatsapp_opt_in=eq.true&select=full_name,phone\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "7b63ef3d-8291-43ee-b59d-a31cec6bfad8",
+    "level": "info",
+    "timestamp": 1775032775749000
+  },
+  {
+    "event_message": "Supabase returned 0 rows\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "98e8a137-6c6f-435e-813d-73d0b3cf4463",
+    "level": "info",
+    "timestamp": 1775032775702000
+  },
+  {
+    "event_message": "Supabase query: https://ypvjmesupjdbchfgjykl.supabase.co/rest/v1/membership_groups?expiry_date=eq.2026-04-01&select=id,expiry_date\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "c8ef07ae-b53a-474c-9084-0d7af6c9643d",
+    "level": "info",
+    "timestamp": 1775032775702000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 918099256185: wamid.HBgMOTE4MDk5MjU2MTg1FQIAERgSNjc0QjYyMTI2QzZDNDQ3RkI0AA==\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "f4396bb1-4781-4286-a7cb-b5c2438ebd14",
+    "level": "info",
+    "timestamp": 1775032775529000
+  },
+  {
+    "event_message": "Supabase query: https://ypvjmesupjdbchfgjykl.supabase.co/rest/v1/membership_groups?expiry_date=eq.2026-04-03&select=id,expiry_date\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "5b6fce15-709d-4073-8a4d-40a6f45f22d3",
+    "level": "info",
+    "timestamp": 1775032775529000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 918143202159: wamid.HBgMOTE4MTQzMjAyMTU5FQIAERgSNTc0QkI2MkQyNjhCN0FGMTgxAA==\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "6e45f50c-3116-4979-8215-a10a8debe3ce",
+    "level": "info",
+    "timestamp": 1775032775140000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 918099256185 (Sandeep)\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "6ee36aa6-2124-4dfb-9919-cc1f6189748b",
+    "level": "info",
+    "timestamp": 1775032775140000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 918247377665: wamid.HBgMOTE4MjQ3Mzc3NjY1FQIAERgSOEM2MDQ0OTcxQjRENTlCNkREAA==\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "136a6d26-0253-4e3e-8e55-98e0a57f2dcd",
+    "level": "info",
+    "timestamp": 1775032774726000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 918143202159 (Raju)\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "ac939076-6440-4372-b0e8-b6b3dd1f4c1e",
+    "level": "info",
+    "timestamp": 1775032774726000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 918247377665 (Abhinav )\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "3cc6c2dc-d624-4859-841e-3f453afc547b",
+    "level": "info",
+    "timestamp": 1775032774333000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 919701130690: wamid.HBgMOTE5NzAxMTMwNjkwFQIAERgSMkZDMjJFNEU0M0NCMEJERDREAA==\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "6735bcd3-1a39-4669-8929-4067dc36db97",
+    "level": "info",
+    "timestamp": 1775032774333000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 918247504527: wamid.HBgMOTE4MjQ3NTA0NTI3FQIAERgSRDJEODgwQUZGQzk0MEI5Njc0AA==\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "55f7b4e2-91a1-46bf-85ba-af39799fcd20",
+    "level": "info",
+    "timestamp": 1775032773852000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 919701130690 (V Tarun )\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "2ffaf00d-23b2-4a7d-8949-59c95a1dc8fa",
+    "level": "info",
+    "timestamp": 1775032773852000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 917013782678: wamid.HBgMOTE3MDEzNzgyNjc4FQIAERgSRjA0ODI3N0IzQkYwMEJCNkJFAA==\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "46782357-2c45-4b9f-9f6a-6ded8ded378c",
+    "level": "info",
+    "timestamp": 1775032773512000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 918247504527 (Kadin)\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "c0dca019-b49e-4d1c-8378-c2ae3ef8aa85",
+    "level": "info",
+    "timestamp": 1775032773512000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 919014861735: wamid.HBgMOTE5MDE0ODYxNzM1FQIAERgSNjY5Njg4RDRGMUIzQ0E0ODYzAA==\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "245b13a1-f648-44c2-81c4-0a2db522b669",
+    "level": "info",
+    "timestamp": 1775032773123000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 917013782678 (Delwin )\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "26824bcc-54a8-45f3-a6ac-2561d534d499",
+    "level": "info",
+    "timestamp": 1775032773123000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 919014861735 (Naveen )\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "2cde95d0-bf10-404a-b1c1-35b440f2c0d5",
+    "level": "info",
+    "timestamp": 1775032772743000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 919281431852: wamid.HBgMOTE5MjgxNDMxODUyFQIAERgSREFCOTlENkJGNTFBOUVFNTE3AA==\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "7742d602-7271-4887-89b6-6c63b9a17075",
+    "level": "info",
+    "timestamp": 1775032772743000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 919281431852 (Kamlesh Kumar)\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "d1755429-bca5-46ce-8117-447a419a13c9",
+    "level": "info",
+    "timestamp": 1775032772398000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 916303813960: wamid.HBgMOTE2MzAzODEzOTYwFQIAERgSRDM5MzNBNTMzQkNBODBDNjZBAA==\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "7311bd22-aec6-4f2e-b4d2-8ad979dc33ee",
+    "level": "info",
+    "timestamp": 1775032772398000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 916303813960 (Akhil)\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "7e49baac-1429-4c50-96fb-e42fd30994d4",
+    "level": "info",
+    "timestamp": 1775032772025000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 918886559369: wamid.HBgMOTE4ODg2NTU5MzY5FQIAERgSMjQzMEZGNDYzMERDRjk4OEQyAA==\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "a83cd1cc-f222-41de-a2e0-f938186573c3",
+    "level": "info",
+    "timestamp": 1775032772025000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 918886559369 (Naresh)\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "a63ad1fa-a68e-4006-9526-a9b543a85f81",
+    "level": "info",
+    "timestamp": 1775032771598000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 919948674787: wamid.HBgMOTE5OTQ4Njc0Nzg3FQIAERgSQkFCQkNDNzBBM0JDNkQyRERBAA==\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "797c1ba0-5cfd-436b-85e9-bac8ada5295d",
+    "level": "info",
+    "timestamp": 1775032771597000
+  },
+  {
+    "event_message": "Sending [gamma_gym_expired_reminder] to 919948674787 (Priya)\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "71460d97-59af-46ca-9c9a-0bdaeb85dc8b",
+    "level": "info",
+    "timestamp": 1775032771196000
+  },
+  {
+    "event_message": "SUCCESS [gamma_gym_expired_reminder] for 917893213662: wamid.HBgMOTE3ODkzMjEzNjYyFQIAERgSOThFODQ4QTk1OEU2QkU5MDc3AA==\n",
+    "event_type": "Log",
+    "execution_id": "51063749-0be5-4f3b-b048-68896a8cf407",
+    "function_id": "1c34ec3f-982e-442e-9720-865abdb99299",
+    "id": "30f409c2-6e53-453e-a5ba-e441dd6f3355",
+    "level": "info",
+    "timestamp": 1775032771196000
+  }
+]
