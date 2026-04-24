@@ -125,7 +125,6 @@ export default function AdminRoutes() {
             )
           }
         />
-        <Route path="due-payments" element={<AdminDuePayments />} />
       </Route>
     </Routes>
   );

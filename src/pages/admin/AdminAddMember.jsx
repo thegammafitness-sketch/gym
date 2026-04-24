@@ -676,145 +676,436 @@
 //   );
 // }
 
+// import { useEffect, useState } from "react";
+// import { supabase } from "../../supabase";
+
+// export default function AdminAddMember() {
+//   const [plans, setPlans] = useState([]);
+//   const [plan, setPlan] = useState(null);
+
+//   const [startDate, setStartDate] = useState(
+//     new Date().toISOString().split("T")[0],
+//   );
+
+//   const [paymentMode, setPaymentMode] = useState("cash");
+
+//   const [singleMember, setSingleMember] = useState({
+//     full_name: "",
+//     phone: "",
+//     photo: null,
+//   });
+
+//   const [groupMembers, setGroupMembers] = useState([]);
+
+//   const [loading, setLoading] = useState(false);
+
+//   useEffect(() => {
+//     supabase
+//       .from("plans")
+//       .select("*")
+//       .then(({ data }) => {
+//         setPlans(data || []);
+//       });
+//   }, []);
+
+//   function handlePlanChange(planId) {
+//     const p = plans.find((x) => x.id === planId);
+
+//     setPlan(p);
+
+//     if (p?.max_members > 1) {
+//       setGroupMembers(
+//         Array.from({ length: p.max_members }).map((_, i) => ({
+//           full_name: "",
+//           phone: "",
+//           photo: null,
+//           is_primary: i === 0,
+//         })),
+//       );
+//     }
+//   }
+
+//   async function uploadPhoto(file) {
+//     const name = `${crypto.randomUUID()}-${file.name}`;
+
+//     await supabase.storage.from("member-photos").upload(name, file);
+
+//     return supabase.storage.from("member-photos").getPublicUrl(name).data
+//       .publicUrl;
+//   }
+
+//   async function handleSubmit() {
+//     if (!plan) return alert("Select plan");
+
+//     const start = startDate;
+
+//     const startObj = new Date(startDate);
+//     const expiryObj = new Date(startObj);
+
+//     expiryObj.setDate(expiryObj.getDate() + plan.duration_days);
+
+//     const expiry = expiryObj.toISOString().split("T")[0];
+
+//     setLoading(true);
+
+//     try {
+//       /* SINGLE MEMBER */
+
+//       if (plan.max_members === 1) {
+//         if (!/^[A-Za-z ]{2,50}$/.test(singleMember.full_name)) {
+//           alert("Enter valid name");
+//           setLoading(false);
+//           return;
+//         }
+
+//         if (!/^[6-9]\d{9}$/.test(singleMember.phone)) {
+//           alert("Enter valid phone");
+//           setLoading(false);
+//           return;
+//         }
+
+//         let photoUrl = null;
+
+//         if (singleMember.photo) {
+//           photoUrl = await uploadPhoto(singleMember.photo);
+//         }
+
+//         const { data: member } = await supabase
+//           .from("members")
+//           .insert({
+//             full_name: singleMember.full_name,
+//             phone: singleMember.phone,
+//             photo_url: photoUrl,
+//             plan_id: plan.id,
+//             plan_name: plan.name,
+//             start_date: start,
+//             expiry_date: expiry,
+//           })
+//           .select()
+//           .single();
+
+//         await supabase.from("payments").insert({
+//           source_type: "single_new",
+//           member_id: member.id,
+//           plan_id: plan.id,
+//           plan_name: plan.name,
+//           amount: plan.price,
+//           payment_mode: paymentMode,
+//         });
+//       } else {
+
+//       /* GROUP MEMBER */
+//         for (const m of groupMembers) {
+//           if (!/^[A-Za-z ]{2,50}$/.test(m.full_name)) {
+//             alert("Enter valid name for all members");
+//             setLoading(false);
+//             return;
+//           }
+
+//           if (!/^[6-9]\d{9}$/.test(m.phone)) {
+//             alert("Enter valid phone for all members");
+//             setLoading(false);
+//             return;
+//           }
+//         }
+
+//         const { data: group } = await supabase
+//           .from("membership_groups")
+//           .insert({
+//             plan_id: plan.id,
+//             plan_name: plan.name,
+//             start_date: start,
+//             expiry_date: expiry,
+//           })
+//           .select()
+//           .single();
+
+//         for (const m of groupMembers) {
+//           let photoUrl = null;
+
+//           if (m.photo) {
+//             photoUrl = await uploadPhoto(m.photo);
+//           }
+
+//           await supabase.from("group_members").insert({
+//             group_id: group.id,
+//             full_name: m.full_name,
+//             phone: m.phone,
+//             photo_url: photoUrl,
+//             is_primary: m.is_primary,
+//             whatsapp_opt_in: true,
+//           });
+//         }
+
+//         await supabase.from("payments").insert({
+//           source_type: "group_new",
+//           group_id: group.id,
+//           plan_id: plan.id,
+//           plan_name: plan.name,
+//           amount: plan.price,
+//           payment_mode: paymentMode,
+//         });
+//       }
+
+//       alert("Member added successfully");
+
+//       window.location.reload();
+//     } catch (err) {
+//       console.error(err);
+//       alert("Error adding member");
+//     } finally {
+//       setLoading(false);
+//     }
+//   }
+
+//   return (
+//     <div className="p-10 max-w-3xl mx-auto">
+//       <h1 className="text-3xl font-bold mb-8">Add Member</h1>
+
+//       {/* PLAN SELECT */}
+
+//       <select
+//         className="border w-full px-4 py-3 rounded-xl mb-4"
+//         onChange={(e) => handlePlanChange(e.target.value)}
+//       >
+//         <option>Select Plan</option>
+
+//         {plans.map((p) => (
+//           <option key={p.id} value={p.id}>
+//             {p.name} – ₹{p.price}
+//           </option>
+//         ))}
+//       </select>
+
+//       {/* START DATE */}
+
+//       <input
+//         type="date"
+//         value={startDate}
+//         onChange={(e) => setStartDate(e.target.value)}
+//         className="border w-full px-4 py-3 rounded-xl mb-4"
+//       />
+
+//       {/* PAYMENT MODE */}
+
+//       <select
+//         value={paymentMode}
+//         onChange={(e) => setPaymentMode(e.target.value)}
+//         className="border w-full px-4 py-3 rounded-xl mb-6"
+//       >
+//         <option value="cash">Cash</option>
+//         <option value="upi">UPI</option>
+//         <option value="card">Card</option>
+//       </select>
+
+//       {plan && (
+//         <div className="bg-slate-100 p-4 rounded-xl mb-6">
+//           <div>Duration: {plan.duration_days} days</div>
+//           <div>Max Members: {plan.max_members}</div>
+//         </div>
+//       )}
+
+//       {/* SINGLE MEMBER FORM */}
+
+//       {plan?.max_members === 1 && (
+//         <div className="space-y-4">
+//           <input
+//             placeholder="Full Name"
+//             className="border px-4 py-3 rounded-xl w-full"
+//             onChange={(e) =>
+//               setSingleMember({
+//                 ...singleMember,
+//                 full_name: e.target.value,
+//               })
+//             }
+//           />
+
+//           <input
+//             placeholder="Phone"
+//             className="border px-4 py-3 rounded-xl w-full"
+//             onChange={(e) =>
+//               setSingleMember({
+//                 ...singleMember,
+//                 phone: e.target.value,
+//               })
+//             }
+//           />
+
+//           <input
+//             type="file"
+//             onChange={(e) =>
+//               setSingleMember({
+//                 ...singleMember,
+//                 photo: e.target.files[0],
+//               })
+//             }
+//           />
+//         </div>
+//       )}
+
+//       {/* GROUP FORM */}
+
+//       {plan?.max_members > 1 &&
+//         groupMembers.map((m, i) => (
+//           <div key={i} className="border rounded-xl p-4 mb-4">
+//             <div className="font-semibold mb-2">
+//               {m.is_primary ? "Primary Member" : `Member ${i + 1}`}
+//             </div>
+
+//             <input
+//               placeholder="Full Name"
+//               className="border px-4 py-2 rounded w-full mb-2"
+//               onChange={(e) => {
+//                 const c = [...groupMembers];
+//                 c[i].full_name = e.target.value;
+//                 setGroupMembers(c);
+//               }}
+//             />
+
+//             <input
+//               placeholder="Phone"
+//               className="border px-4 py-2 rounded w-full mb-2"
+//               onChange={(e) => {
+//                 const c = [...groupMembers];
+//                 c[i].phone = e.target.value;
+//                 setGroupMembers(c);
+//               }}
+//             />
+
+//             <input
+//               type="file"
+//               onChange={(e) => {
+//                 const c = [...groupMembers];
+//                 c[i].photo = e.target.files[0];
+//                 setGroupMembers(c);
+//               }}
+//             />
+//           </div>
+//         ))}
+
+//       {plan && (
+//         <button
+//           disabled={loading}
+//           onClick={handleSubmit}
+//           className="mt-6 w-full bg-indigo-600 text-white py-3 rounded-xl"
+//         >
+//           {loading ? "Saving..." : "Add Member"}
+//         </button>
+//       )}
+//     </div>
+//   );
+// }
+
+
 import { useEffect, useState } from "react";
 import { supabase } from "../../supabase";
 
 export default function AdminAddMember() {
-  const [plans, setPlans] = useState([]);
-  const [plan, setPlan] = useState(null);
+  const [plans, setPlans]   = useState([]);
+  const [plan, setPlan]     = useState(null);
 
   const [startDate, setStartDate] = useState(
-    new Date().toISOString().split("T")[0],
+    new Date().toISOString().split("T")[0]
   );
 
   const [paymentMode, setPaymentMode] = useState("cash");
 
   const [singleMember, setSingleMember] = useState({
-    full_name: "",
-    phone: "",
-    photo: null,
+    full_name: "", phone: "", photo: null,
   });
 
   const [groupMembers, setGroupMembers] = useState([]);
-
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading]           = useState(false);
 
   useEffect(() => {
-    supabase
-      .from("plans")
-      .select("*")
-      .then(({ data }) => {
-        setPlans(data || []);
-      });
+    supabase.from("plans").select("*").then(({ data }) => {
+      setPlans(data || []);
+    });
   }, []);
 
   function handlePlanChange(planId) {
     const p = plans.find((x) => x.id === planId);
-
     setPlan(p);
 
     if (p?.max_members > 1) {
       setGroupMembers(
         Array.from({ length: p.max_members }).map((_, i) => ({
-          full_name: "",
-          phone: "",
-          photo: null,
-          is_primary: i === 0,
-        })),
+          full_name: "", phone: "", photo: null, is_primary: i === 0,
+        }))
       );
     }
   }
 
   async function uploadPhoto(file) {
     const name = `${crypto.randomUUID()}-${file.name}`;
-
     await supabase.storage.from("member-photos").upload(name, file);
-
-    return supabase.storage.from("member-photos").getPublicUrl(name).data
-      .publicUrl;
+    return supabase.storage.from("member-photos").getPublicUrl(name).data.publicUrl;
   }
 
   async function handleSubmit() {
     if (!plan) return alert("Select plan");
 
-    const start = startDate;
-
-    const startObj = new Date(startDate);
-    const expiryObj = new Date(startObj);
-
+    const start      = startDate;
+    const startObj   = new Date(startDate);
+    const expiryObj  = new Date(startObj);
     expiryObj.setDate(expiryObj.getDate() + plan.duration_days);
-
-    const expiry = expiryObj.toISOString().split("T")[0];
+    const expiry     = expiryObj.toISOString().split("T")[0];
 
     setLoading(true);
 
     try {
-      /* SINGLE MEMBER */
-
+      /* ────── SINGLE MEMBER ────── */
       if (plan.max_members === 1) {
         if (!/^[A-Za-z ]{2,50}$/.test(singleMember.full_name)) {
-          alert("Enter valid name");
-          setLoading(false);
-          return;
+          alert("Enter valid name"); setLoading(false); return;
         }
-
         if (!/^[6-9]\d{9}$/.test(singleMember.phone)) {
-          alert("Enter valid phone");
-          setLoading(false);
-          return;
+          alert("Enter valid phone"); setLoading(false); return;
         }
 
         let photoUrl = null;
-
-        if (singleMember.photo) {
-          photoUrl = await uploadPhoto(singleMember.photo);
-        }
+        if (singleMember.photo) photoUrl = await uploadPhoto(singleMember.photo);
 
         const { data: member } = await supabase
           .from("members")
           .insert({
-            full_name: singleMember.full_name,
-            phone: singleMember.phone,
-            photo_url: photoUrl,
-            plan_id: plan.id,
-            plan_name: plan.name,
-            start_date: start,
+            full_name:   singleMember.full_name,
+            phone:       singleMember.phone,
+            photo_url:   photoUrl,
+            plan_id:     plan.id,
+            plan_name:   plan.name,
+            start_date:  start,
             expiry_date: expiry,
           })
           .select()
           .single();
 
         await supabase.from("payments").insert({
-          source_type: "single_new",
-          member_id: member.id,
-          plan_id: plan.id,
-          plan_name: plan.name,
-          amount: plan.price,
+          source_type:  "single_new",
+          member_id:    member.id,
+          plan_id:      plan.id,
+          plan_name:    plan.name,
+          amount:       plan.price,
           payment_mode: paymentMode,
         });
-      } else {
 
-      /* GROUP MEMBER */
+      } else {
+        /* ────── GROUP MEMBER ────── */
         for (const m of groupMembers) {
           if (!/^[A-Za-z ]{2,50}$/.test(m.full_name)) {
-            alert("Enter valid name for all members");
-            setLoading(false);
-            return;
+            alert("Enter valid name for all members"); setLoading(false); return;
           }
-
           if (!/^[6-9]\d{9}$/.test(m.phone)) {
-            alert("Enter valid phone for all members");
-            setLoading(false);
-            return;
+            alert("Enter valid phone for all members"); setLoading(false); return;
           }
         }
 
         const { data: group } = await supabase
           .from("membership_groups")
           .insert({
-            plan_id: plan.id,
-            plan_name: plan.name,
-            start_date: start,
+            plan_id:     plan.id,
+            plan_name:   plan.name,
+            start_date:  start,
             expiry_date: expiry,
           })
           .select()
@@ -822,34 +1113,31 @@ export default function AdminAddMember() {
 
         for (const m of groupMembers) {
           let photoUrl = null;
-
-          if (m.photo) {
-            photoUrl = await uploadPhoto(m.photo);
-          }
+          if (m.photo) photoUrl = await uploadPhoto(m.photo);
 
           await supabase.from("group_members").insert({
-            group_id: group.id,
-            full_name: m.full_name,
-            phone: m.phone,
-            photo_url: photoUrl,
-            is_primary: m.is_primary,
+            group_id:        group.id,
+            full_name:       m.full_name,
+            phone:           m.phone,
+            photo_url:       photoUrl,
+            is_primary:      m.is_primary,
             whatsapp_opt_in: true,
           });
         }
 
         await supabase.from("payments").insert({
-          source_type: "group_new",
-          group_id: group.id,
-          plan_id: plan.id,
-          plan_name: plan.name,
-          amount: plan.price,
+          source_type:  "group_new",
+          group_id:     group.id,
+          plan_id:      plan.id,
+          plan_name:    plan.name,
+          amount:       plan.price,
           payment_mode: paymentMode,
         });
       }
 
-      alert("Member added successfully");
-
+      alert("Member added successfully!");
       window.location.reload();
+
     } catch (err) {
       console.error(err);
       alert("Error adding member");
@@ -863,22 +1151,17 @@ export default function AdminAddMember() {
       <h1 className="text-3xl font-bold mb-8">Add Member</h1>
 
       {/* PLAN SELECT */}
-
       <select
         className="border w-full px-4 py-3 rounded-xl mb-4"
         onChange={(e) => handlePlanChange(e.target.value)}
       >
         <option>Select Plan</option>
-
         {plans.map((p) => (
-          <option key={p.id} value={p.id}>
-            {p.name} – ₹{p.price}
-          </option>
+          <option key={p.id} value={p.id}>{p.name} – ₹{p.price}</option>
         ))}
       </select>
 
       {/* START DATE */}
-
       <input
         type="date"
         value={startDate}
@@ -887,107 +1170,84 @@ export default function AdminAddMember() {
       />
 
       {/* PAYMENT MODE */}
-
       <select
         value={paymentMode}
         onChange={(e) => setPaymentMode(e.target.value)}
         className="border w-full px-4 py-3 rounded-xl mb-6"
       >
-        <option value="cash">Cash</option>
-        <option value="upi">UPI</option>
-        <option value="card">Card</option>
+        <option value="cash">💵 Cash</option>
+        <option value="upi">📱 UPI</option>
+        <option value="card">💳 Card</option>
       </select>
 
+      {/* PLAN INFO */}
       {plan && (
         <div className="bg-slate-100 p-4 rounded-xl mb-6">
           <div>Duration: {plan.duration_days} days</div>
           <div>Max Members: {plan.max_members}</div>
+          <div className="font-semibold text-indigo-700">Amount: ₹{plan.price}</div>
         </div>
       )}
 
       {/* SINGLE MEMBER FORM */}
-
       {plan?.max_members === 1 && (
         <div className="space-y-4">
           <input
             placeholder="Full Name"
             className="border px-4 py-3 rounded-xl w-full"
-            onChange={(e) =>
-              setSingleMember({
-                ...singleMember,
-                full_name: e.target.value,
-              })
-            }
+            value={singleMember.full_name}
+            onChange={(e) => setSingleMember({ ...singleMember, full_name: e.target.value })}
           />
-
           <input
             placeholder="Phone"
             className="border px-4 py-3 rounded-xl w-full"
-            onChange={(e) =>
-              setSingleMember({
-                ...singleMember,
-                phone: e.target.value,
-              })
-            }
+            value={singleMember.phone}
+            onChange={(e) => setSingleMember({ ...singleMember, phone: e.target.value })}
           />
-
           <input
             type="file"
-            onChange={(e) =>
-              setSingleMember({
-                ...singleMember,
-                photo: e.target.files[0],
-              })
-            }
+            className="border px-4 py-3 rounded-xl w-full"
+            onChange={(e) => setSingleMember({ ...singleMember, photo: e.target.files[0] })}
           />
         </div>
       )}
 
       {/* GROUP FORM */}
-
       {plan?.max_members > 1 &&
         groupMembers.map((m, i) => (
           <div key={i} className="border rounded-xl p-4 mb-4">
             <div className="font-semibold mb-2">
               {m.is_primary ? "Primary Member" : `Member ${i + 1}`}
             </div>
-
             <input
               placeholder="Full Name"
               className="border px-4 py-2 rounded w-full mb-2"
               onChange={(e) => {
-                const c = [...groupMembers];
-                c[i].full_name = e.target.value;
-                setGroupMembers(c);
+                const c = [...groupMembers]; c[i].full_name = e.target.value; setGroupMembers(c);
               }}
             />
-
             <input
               placeholder="Phone"
               className="border px-4 py-2 rounded w-full mb-2"
               onChange={(e) => {
-                const c = [...groupMembers];
-                c[i].phone = e.target.value;
-                setGroupMembers(c);
+                const c = [...groupMembers]; c[i].phone = e.target.value; setGroupMembers(c);
               }}
             />
-
             <input
               type="file"
               onChange={(e) => {
-                const c = [...groupMembers];
-                c[i].photo = e.target.files[0];
-                setGroupMembers(c);
+                const c = [...groupMembers]; c[i].photo = e.target.files[0]; setGroupMembers(c);
               }}
             />
           </div>
         ))}
 
+      {/* SUBMIT */}
       {plan && (
         <button
           disabled={loading}
           onClick={handleSubmit}
-          className="mt-6 w-full bg-indigo-600 text-white py-3 rounded-xl"
+          className="mt-6 w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:scale-[1.02] transition"
         >
           {loading ? "Saving..." : "Add Member"}
         </button>
@@ -995,3 +1255,302 @@ export default function AdminAddMember() {
     </div>
   );
 }
+
+// import { useEffect, useState } from "react";
+// import { supabase } from "../../supabase";
+
+
+// const WHATSAPP_TOKEN = import.meta.env.VITE_WHATSAPP_TOKEN;
+// const PHONE_NUMBER_ID = import.meta.env.VITE_PHONE_NUMBER_ID;
+// const TEMPLATE_NAME = "new_member";
+
+// // ✅ WhatsApp message bhejne ka function
+// async function sendWelcomeMessage(phone, name) {
+//   const digits = phone.replace(/\D/g, "");
+//   const to = digits.startsWith("91") ? digits : "91" + digits;
+
+//   try {
+//     const res = await fetch(
+//       `https://graph.facebook.com/v20.0/${PHONE_NUMBER_ID}/messages`,
+//       {
+//         method: "POST",
+//         headers: {
+//           Authorization: `Bearer ${WHATSAPP_TOKEN}`,
+//           "Content-Type": "application/json",
+//         },
+//         body: JSON.stringify({
+//           messaging_product: "whatsapp",
+//           to,
+//           type: "template",
+//           template: {
+//             name: TEMPLATE_NAME,
+//             language: { code: "en" },
+//             components: [
+//               {
+//                 type: "body",
+//                 parameters: [
+//                   { type: "text", text: name }, // {{1}} = member name
+//                 ],
+//               },
+//             ],
+//           },
+//         }),
+//       }
+//     );
+//     const data = await res.json();
+//     console.log("WhatsApp welcome sent:", data);
+//   } catch (err) {
+//     console.error("WhatsApp send failed:", err);
+//     // Message fail hone pe member add hona nahi rukna chahiye
+//   }
+// }
+
+// export default function AdminAddMember() {
+//   const [plans, setPlans]   = useState([]);
+//   const [plan, setPlan]     = useState(null);
+//   const [startDate, setStartDate] = useState(
+//     new Date().toISOString().split("T")[0]
+//   );
+//   const [paymentMode, setPaymentMode] = useState("cash");
+//   const [singleMember, setSingleMember] = useState({
+//     full_name: "", phone: "", photo: null,
+//   });
+//   const [groupMembers, setGroupMembers] = useState([]);
+//   const [loading, setLoading] = useState(false);
+
+//   useEffect(() => {
+//     supabase.from("plans").select("*").then(({ data }) => {
+//       setPlans(data || []);
+//     });
+//   }, []);
+
+//   function handlePlanChange(planId) {
+//     const p = plans.find((x) => x.id === planId);
+//     setPlan(p);
+//     if (p?.max_members > 1) {
+//       setGroupMembers(
+//         Array.from({ length: p.max_members }).map((_, i) => ({
+//           full_name: "", phone: "", photo: null, is_primary: i === 0,
+//         }))
+//       );
+//     }
+//   }
+
+//   async function uploadPhoto(file) {
+//     const name = `${crypto.randomUUID()}-${file.name}`;
+//     await supabase.storage.from("member-photos").upload(name, file);
+//     return supabase.storage.from("member-photos").getPublicUrl(name).data.publicUrl;
+//   }
+
+//   async function handleSubmit() {
+//     if (!plan) return alert("Select plan");
+
+//     const start     = startDate;
+//     const startObj  = new Date(startDate);
+//     const expiryObj = new Date(startObj);
+//     expiryObj.setDate(expiryObj.getDate() + plan.duration_days);
+//     const expiry    = expiryObj.toISOString().split("T")[0];
+
+//     setLoading(true);
+
+//     try {
+//       /* ────── SINGLE MEMBER ────── */
+//       if (plan.max_members === 1) {
+//         if (!/^[A-Za-z ]{2,50}$/.test(singleMember.full_name)) {
+//           alert("Enter valid name"); setLoading(false); return;
+//         }
+//         if (!/^[6-9]\d{9}$/.test(singleMember.phone)) {
+//           alert("Enter valid phone"); setLoading(false); return;
+//         }
+
+//         let photoUrl = null;
+//         if (singleMember.photo) photoUrl = await uploadPhoto(singleMember.photo);
+
+//         const { data: member } = await supabase
+//           .from("members")
+//           .insert({
+//             full_name:   singleMember.full_name,
+//             phone:       singleMember.phone,
+//             photo_url:   photoUrl,
+//             plan_id:     plan.id,
+//             plan_name:   plan.name,
+//             start_date:  start,
+//             expiry_date: expiry,
+//           })
+//           .select()
+//           .single();
+
+//         await supabase.from("payments").insert({
+//           source_type:  "single_new",
+//           member_id:    member.id,
+//           plan_id:      plan.id,
+//           plan_name:    plan.name,
+//           amount:       plan.price,
+//           payment_mode: paymentMode,
+//         });
+
+//         // ✅ Single member ko welcome message bhejo
+//         await sendWelcomeMessage(singleMember.phone, singleMember.full_name);
+
+//       } else {
+//         /* ────── GROUP MEMBER ────── */
+//         for (const m of groupMembers) {
+//           if (!/^[A-Za-z ]{2,50}$/.test(m.full_name)) {
+//             alert("Enter valid name for all members"); setLoading(false); return;
+//           }
+//           if (!/^[6-9]\d{9}$/.test(m.phone)) {
+//             alert("Enter valid phone for all members"); setLoading(false); return;
+//           }
+//         }
+
+//         const { data: group } = await supabase
+//           .from("membership_groups")
+//           .insert({
+//             plan_id:     plan.id,
+//             plan_name:   plan.name,
+//             start_date:  start,
+//             expiry_date: expiry,
+//           })
+//           .select()
+//           .single();
+
+//         for (const m of groupMembers) {
+//           let photoUrl = null;
+//           if (m.photo) photoUrl = await uploadPhoto(m.photo);
+
+//           await supabase.from("group_members").insert({
+//             group_id:        group.id,
+//             full_name:       m.full_name,
+//             phone:           m.phone,
+//             photo_url:       photoUrl,
+//             is_primary:      m.is_primary,
+//             whatsapp_opt_in: true,
+//           });
+
+//           // ✅ Har group member ko welcome message bhejo
+//           await sendWelcomeMessage(m.phone, m.full_name);
+//         }
+
+//         await supabase.from("payments").insert({
+//           source_type:  "group_new",
+//           group_id:     group.id,
+//           plan_id:      plan.id,
+//           plan_name:    plan.name,
+//           amount:       plan.price,
+//           payment_mode: paymentMode,
+//         });
+//       }
+
+//       alert("Member added successfully!");
+//       window.location.reload();
+
+//     } catch (err) {
+//       console.error(err);
+//       alert("Error adding member");
+//     } finally {
+//       setLoading(false);
+//     }
+//   }
+
+//   return (
+//     <div className="p-10 max-w-3xl mx-auto">
+//       <h1 className="text-3xl font-bold mb-8">Add Member</h1>
+
+//       <select
+//         className="border w-full px-4 py-3 rounded-xl mb-4"
+//         onChange={(e) => handlePlanChange(e.target.value)}
+//       >
+//         <option>Select Plan</option>
+//         {plans.map((p) => (
+//           <option key={p.id} value={p.id}>{p.name} – ₹{p.price}</option>
+//         ))}
+//       </select>
+
+//       <input
+//         type="date"
+//         value={startDate}
+//         onChange={(e) => setStartDate(e.target.value)}
+//         className="border w-full px-4 py-3 rounded-xl mb-4"
+//       />
+
+//       <select
+//         value={paymentMode}
+//         onChange={(e) => setPaymentMode(e.target.value)}
+//         className="border w-full px-4 py-3 rounded-xl mb-6"
+//       >
+//         <option value="cash">💵 Cash</option>
+//         <option value="upi">📱 UPI</option>
+//         <option value="card">💳 Card</option>
+//       </select>
+
+//       {plan && (
+//         <div className="bg-slate-100 p-4 rounded-xl mb-6">
+//           <div>Duration: {plan.duration_days} days</div>
+//           <div>Max Members: {plan.max_members}</div>
+//           <div className="font-semibold text-indigo-700">Amount: ₹{plan.price}</div>
+//         </div>
+//       )}
+
+//       {plan?.max_members === 1 && (
+//         <div className="space-y-4">
+//           <input
+//             placeholder="Full Name"
+//             className="border px-4 py-3 rounded-xl w-full"
+//             value={singleMember.full_name}
+//             onChange={(e) => setSingleMember({ ...singleMember, full_name: e.target.value })}
+//           />
+//           <input
+//             placeholder="Phone"
+//             className="border px-4 py-3 rounded-xl w-full"
+//             value={singleMember.phone}
+//             onChange={(e) => setSingleMember({ ...singleMember, phone: e.target.value })}
+//           />
+//           <input
+//             type="file"
+//             className="border px-4 py-3 rounded-xl w-full"
+//             onChange={(e) => setSingleMember({ ...singleMember, photo: e.target.files[0] })}
+//           />
+//         </div>
+//       )}
+
+//       {plan?.max_members > 1 &&
+//         groupMembers.map((m, i) => (
+//           <div key={i} className="border rounded-xl p-4 mb-4">
+//             <div className="font-semibold mb-2">
+//               {m.is_primary ? "Primary Member" : `Member ${i + 1}`}
+//             </div>
+//             <input
+//               placeholder="Full Name"
+//               className="border px-4 py-2 rounded w-full mb-2"
+//               onChange={(e) => {
+//                 const c = [...groupMembers]; c[i].full_name = e.target.value; setGroupMembers(c);
+//               }}
+//             />
+//             <input
+//               placeholder="Phone"
+//               className="border px-4 py-2 rounded w-full mb-2"
+//               onChange={(e) => {
+//                 const c = [...groupMembers]; c[i].phone = e.target.value; setGroupMembers(c);
+//               }}
+//             />
+//             <input
+//               type="file"
+//               onChange={(e) => {
+//                 const c = [...groupMembers]; c[i].photo = e.target.files[0]; setGroupMembers(c);
+//               }}
+//             />
+//           </div>
+//         ))}
+
+//       {plan && (
+//         <button
+//           disabled={loading}
+//           onClick={handleSubmit}
+//           className="mt-6 w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:scale-[1.02] transition"
+//         >
+//           {loading ? "Saving..." : "Add Member"}
+//         </button>
+//       )}
+//     </div>
+//   );
+// }

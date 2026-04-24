@@ -257,9 +257,9 @@ export default function AdminLayout({ role }) {
               </button>
             )}
 
-            <SidebarLink to="/admin/due-payments" collapsed={collapsed}>
+            {/* <SidebarLink to="/admin/due-payments" collapsed={collapsed}>
               ⚠️ Due Payments
-            </SidebarLink>
+            </SidebarLink> */}
 
             <button
               onClick={logout}
