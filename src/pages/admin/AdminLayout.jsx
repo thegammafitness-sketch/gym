@@ -37,8 +37,6 @@
 //       </main>
 //     </div>
 //   );
-// }
-
 // import { Outlet, NavLink, useNavigate } from "react-router-dom";
 // import { supabase } from "../../supabase";
 // import { useState } from "react";

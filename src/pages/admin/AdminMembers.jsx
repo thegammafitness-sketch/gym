@@ -3014,8 +3014,29 @@ export default function AdminMembers() {
     setPlans(plansData       || []);
   }
 
+  function sortMembers(list, filter) {
+    return [...list].sort((a, b) => {
+      const expA = a.expiry_date || "";
+      const expB = b.expiry_date || "";
+      if (!expA && !expB) return 0;
+      if (!expA) return 1;
+      if (!expB) return -1;
+
+      if (filter === "expired") {
+        // Most recently expired first (e.g. 2026-08-09 before 2026-07-01)
+        return expB.localeCompare(expA);
+      } else if (filter === "due" || filter === "active") {
+        // Expiring soonest first
+        return expA.localeCompare(expB);
+      } else {
+        // For 'all': sort with most recent expiry date at top
+        return expB.localeCompare(expA);
+      }
+    });
+  }
+
   function filterSingles(list) {
-    return list.filter((m) => {
+    const filtered = list.filter((m) => {
       if (statusFilter !== "all" && getStatus(m.expiry_date) !== statusFilter) return false;
       if (search.trim()) {
         const q = search.toLowerCase();
@@ -3023,10 +3044,11 @@ export default function AdminMembers() {
       }
       return true;
     });
+    return sortMembers(filtered, statusFilter);
   }
 
   function filterGroups(list) {
-    return list.filter((g) => {
+    const filtered = list.filter((g) => {
       if (statusFilter !== "all" && getStatus(g.expiry_date) !== statusFilter) return false;
       if (search.trim()) {
         const q = search.toLowerCase();
@@ -3036,6 +3058,7 @@ export default function AdminMembers() {
       }
       return true;
     });
+    return sortMembers(filtered, statusFilter);
   }
 
   const filteredSingles = filterSingles(singleMembers);
@@ -3505,11 +3528,35 @@ export default function AdminMembers() {
                   <div className="text-xs font-bold text-slate-500 uppercase mb-3">
                     {m.is_primary ? "👑 Primary Member" : `Member ${i + 1}`}
                   </div>
-                  <input defaultValue={m.full_name} onChange={(e) => (m.full_name = e.target.value)}
-                    className="border px-3 py-2 rounded-xl w-full mb-2 text-sm" placeholder="Full Name" />
-                  <input defaultValue={m.phone} onChange={(e) => (m.phone = e.target.value)}
-                    className="border px-3 py-2 rounded-xl w-full mb-2 text-sm" placeholder="Phone" />
-                  <input type="file" onChange={(e) => (m.newPhoto = e.target.files[0])} className="text-xs" />
+                  <input
+                    value={m.full_name || ""}
+                    onChange={(e) => {
+                      const updated = [...editingGroup.group_members];
+                      updated[i] = { ...updated[i], full_name: e.target.value };
+                      setEditingGroup({ ...editingGroup, group_members: updated });
+                    }}
+                    className="border px-3 py-2 rounded-xl w-full mb-2 text-sm"
+                    placeholder="Full Name"
+                  />
+                  <input
+                    value={m.phone || ""}
+                    onChange={(e) => {
+                      const updated = [...editingGroup.group_members];
+                      updated[i] = { ...updated[i], phone: e.target.value };
+                      setEditingGroup({ ...editingGroup, group_members: updated });
+                    }}
+                    className="border px-3 py-2 rounded-xl w-full mb-2 text-sm"
+                    placeholder="Phone"
+                  />
+                  <input
+                    type="file"
+                    onChange={(e) => {
+                      const updated = [...editingGroup.group_members];
+                      updated[i] = { ...updated[i], newPhoto: e.target.files[0] };
+                      setEditingGroup({ ...editingGroup, group_members: updated });
+                    }}
+                    className="text-xs"
+                  />
                 </div>
               ))}
               <div className="flex gap-2 mt-2">
