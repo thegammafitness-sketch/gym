@@ -2989,6 +2989,7 @@ export default function AdminMembers() {
   const [selectedPlanId,    setSelectedPlanId]    = useState("");
   const [selectedStartDate, setSelectedStartDate] = useState(new Date().toISOString().split("T")[0]);
   const [renewPaymentMode,  setRenewPaymentMode]  = useState("cash");
+  const [additionalMembers, setAdditionalMembers] = useState([]);
 
   const [editingGroup, setEditingGroup] = useState(null);
 
@@ -3085,25 +3086,168 @@ export default function AdminMembers() {
     setPayHistoryLoading(false);
   }
 
+  function handleRenewPlanChange(planId) {
+    setSelectedPlanId(planId);
+    const plan = plans.find((p) => p.id === planId);
+    if (!plan) {
+      setAdditionalMembers([]);
+      return;
+    }
+
+    if (renewTarget?.type === "single" && plan.max_members > 1) {
+      const needed = plan.max_members - 1;
+      setAdditionalMembers(
+        Array.from({ length: needed }).map(() => ({
+          full_name: "",
+          phone: "",
+          photo: null,
+        }))
+      );
+    } else if (
+      renewTarget?.type === "group" &&
+      plan.max_members > (renewTarget.data.group_members?.length || 1)
+    ) {
+      const currentCount = renewTarget.data.group_members?.length || 1;
+      const needed = plan.max_members - currentCount;
+      setAdditionalMembers(
+        Array.from({ length: needed }).map(() => ({
+          full_name: "",
+          phone: "",
+          photo: null,
+        }))
+      );
+    } else {
+      setAdditionalMembers([]);
+    }
+  }
+
   async function handleRenewConfirm() {
     const plan = plans.find((p) => p.id === selectedPlanId);
     if (!plan) { alert("Select a plan"); return; }
-    const startObj  = new Date(selectedStartDate);
+    const startObj  = new Date(selectedStartDate + "T00:00:00");
     const expiryObj = new Date(startObj);
     expiryObj.setDate(expiryObj.getDate() + plan.duration_days);
     const start  = startObj.toLocaleDateString("en-CA");
     const expiry = expiryObj.toLocaleDateString("en-CA");
 
-    if (renewTarget.type === "single") {
+    // Case 1: Single Member converting to Group Pack (Couple / Buddy)
+    if (renewTarget.type === "single" && plan.max_members > 1) {
+      for (let i = 0; i < additionalMembers.length; i++) {
+        const extra = additionalMembers[i];
+        if (!/^[A-Za-z ]{2,50}$/.test(extra.full_name)) {
+          alert(`Enter a valid name for Member ${i + 2}`);
+          return;
+        }
+        if (!/^[6-9]\d{9}$/.test(extra.phone)) {
+          alert(`Enter a valid 10-digit phone for Member ${i + 2}`);
+          return;
+        }
+      }
+
+      const m = renewTarget.data;
+
+      // 1. Create membership group
+      const { data: group, error: groupError } = await supabase
+        .from("membership_groups")
+        .insert({
+          plan_id: plan.id,
+          plan_name: plan.name,
+          start_date: start,
+          expiry_date: expiry,
+        })
+        .select()
+        .single();
+
+      if (groupError) {
+        console.error(groupError);
+        alert("Failed to create membership group.");
+        return;
+      }
+
+      // 2. Insert primary member into group_members
+      const { error: primaryError } = await supabase.from("group_members").insert({
+        group_id: group.id,
+        full_name: m.full_name,
+        phone: m.phone,
+        photo_url: m.photo_url,
+        is_primary: true,
+        whatsapp_opt_in: true,
+      });
+
+      if (primaryError) {
+        console.error(primaryError);
+        alert("Failed to add primary member to group.");
+        return;
+      }
+
+      // 3. Insert additional member(s) into group_members
+      for (const extra of additionalMembers) {
+        let photoUrl = null;
+        if (extra.photo) {
+          photoUrl = await uploadPhoto(extra.photo);
+        }
+        await supabase.from("group_members").insert({
+          group_id: group.id,
+          full_name: extra.full_name,
+          phone: extra.phone,
+          photo_url: photoUrl,
+          is_primary: false,
+          whatsapp_opt_in: true,
+        });
+      }
+
+      // 4. Record payment
+      await supabase.from("payments").insert({
+        source_type: "group_renew",
+        group_id: group.id,
+        plan_id: plan.id,
+        plan_name: plan.name,
+        amount: plan.price,
+        payment_mode: renewPaymentMode,
+      });
+
+      // 5. Delete old single member row
+      await supabase.from("members").delete().eq("id", m.id);
+
+      alert(`Successfully renewed and converted ${m.full_name} to ${plan.name}!`);
+    }
+    // Case 2: Standard Single Member Renew (to single plan)
+    else if (renewTarget.type === "single") {
       const m = renewTarget.data;
       await supabase.from("members").update({ plan_id: plan.id, plan_name: plan.name, start_date: start, expiry_date: expiry }).eq("id", m.id);
       await supabase.from("payments").insert({ source_type: "single_renew", member_id: m.id, plan_id: plan.id, plan_name: plan.name, amount: plan.price, payment_mode: renewPaymentMode });
-    } else {
+    }
+    // Case 3: Group Member Renew
+    else {
       const g = renewTarget.data;
       await supabase.from("membership_groups").update({ plan_id: plan.id, plan_name: plan.name, start_date: start, expiry_date: expiry }).eq("id", g.id);
+
+      // If group size expanded, insert extra members
+      if (additionalMembers.length > 0) {
+        for (let i = 0; i < additionalMembers.length; i++) {
+          const extra = additionalMembers[i];
+          if (extra.full_name && extra.phone) {
+            let photoUrl = null;
+            if (extra.photo) photoUrl = await uploadPhoto(extra.photo);
+            await supabase.from("group_members").insert({
+              group_id: g.id,
+              full_name: extra.full_name,
+              phone: extra.phone,
+              photo_url: photoUrl,
+              is_primary: false,
+              whatsapp_opt_in: true,
+            });
+          }
+        }
+      }
+
       await supabase.from("payments").insert({ source_type: "group_renew", group_id: g.id, plan_id: plan.id, plan_name: plan.name, amount: plan.price, payment_mode: renewPaymentMode });
     }
-    setRenewTarget(null); setSelectedPlanId(""); setRenewPaymentMode("cash");
+
+    setRenewTarget(null);
+    setSelectedPlanId("");
+    setAdditionalMembers([]);
+    setRenewPaymentMode("cash");
     setSelectedStartDate(new Date().toISOString().split("T")[0]);
     fetchAll();
   }
@@ -3289,7 +3433,7 @@ export default function AdminMembers() {
                         💳 History
                       </button>
                       {(status === "expired" || status === "due") && (
-                        <button onClick={() => setRenewTarget({ type: "single", data: m })}
+                        <button onClick={() => { setRenewTarget({ type: "single", data: m }); setSelectedPlanId(""); setAdditionalMembers([]); }}
                           className="flex-1 bg-indigo-600 text-white py-2 rounded-xl text-xs font-semibold hover:bg-indigo-700 transition">
                           🔄 Renew
                         </button>
@@ -3371,7 +3515,7 @@ export default function AdminMembers() {
                         💳 History
                       </button>
                       {(status === "expired" || status === "due") && (
-                        <button onClick={() => setRenewTarget({ type: "group", data: g })}
+                        <button onClick={() => { setRenewTarget({ type: "group", data: g }); setSelectedPlanId(""); setAdditionalMembers([]); }}
                           className="flex-1 bg-indigo-600 text-white py-2 rounded-xl text-xs font-semibold hover:bg-indigo-700 transition">
                           🔄 Renew
                         </button>
@@ -3444,45 +3588,159 @@ export default function AdminMembers() {
         </Modal>
       )}
 
-      {/* Renew */}
+      {/* Renew Modal */}
       {renewTarget && (
         <Modal>
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white p-8 rounded-3xl w-96 shadow-2xl">
-              <h3 className="text-lg font-bold text-slate-800 mb-1">
-                {renewTarget.type === "group" ? "Renew Group" : "Renew Member"}
-              </h3>
-              <p className="text-sm text-slate-400 mb-6">
-                {renewTarget.type === "group"
-                  ? renewTarget.data.group_members?.map((m) => m.full_name).join(", ")
-                  : renewTarget.data.full_name}
-              </p>
-              <label className="text-xs font-semibold text-slate-500 uppercase mb-1 block">Start Date</label>
-              <input type="date" value={selectedStartDate} onChange={(e) => setSelectedStartDate(e.target.value)}
-                className="border w-full px-3 py-2.5 mb-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400" />
-              <label className="text-xs font-semibold text-slate-500 uppercase mb-1 block">Plan</label>
-              <select value={selectedPlanId} onChange={(e) => setSelectedPlanId(e.target.value)}
-                className="border w-full px-3 py-2.5 mb-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400">
-                <option value="">Select Plan</option>
-                {plans.map((p) => <option key={p.id} value={p.id}>{p.name} – ₹{p.price}</option>)}
-              </select>
-              <label className="text-xs font-semibold text-slate-500 uppercase mb-1 block">Payment Mode</label>
-              <select value={renewPaymentMode} onChange={(e) => setRenewPaymentMode(e.target.value)}
-                className="border w-full px-3 py-2.5 mb-5 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400">
-                <option value="cash">💵 Cash</option>
-                <option value="upi">📱 UPI</option>
-                <option value="card">💳 Card</option>
-              </select>
-              {selectedPlanId && (
-                <div className="bg-indigo-50 text-indigo-700 text-sm font-bold px-4 py-3 rounded-2xl mb-5 text-center">
-                  Amount: ₹{plans.find((p) => p.id === selectedPlanId)?.price?.toLocaleString("en-IN")}
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white p-8 rounded-3xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-4">
+                <div>
+                  <h3 className="text-xl font-bold text-slate-800">
+                    {renewTarget.type === "group" ? "Renew Group" : "Renew Member"}
+                  </h3>
+                  <p className="text-sm text-slate-400 mt-0.5">
+                    {renewTarget.type === "group"
+                      ? renewTarget.data.group_members?.map((m) => m.full_name).join(", ")
+                      : `${renewTarget.data.full_name} (${renewTarget.data.phone})`}
+                  </p>
                 </div>
-              )}
+                <button
+                  onClick={() => {
+                    setRenewTarget(null);
+                    setSelectedPlanId("");
+                    setAdditionalMembers([]);
+                    setRenewPaymentMode("cash");
+                  }}
+                  className="text-slate-400 hover:text-slate-700 text-2xl leading-none"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="space-y-4 mb-6">
+                <div>
+                  <label className="text-xs font-semibold text-slate-500 uppercase mb-1 block">Start Date</label>
+                  <input
+                    type="date"
+                    value={selectedStartDate}
+                    onChange={(e) => setSelectedStartDate(e.target.value)}
+                    className="border w-full px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-slate-500 uppercase mb-1 block">Select Plan</label>
+                  <select
+                    value={selectedPlanId}
+                    onChange={(e) => handleRenewPlanChange(e.target.value)}
+                    className="border w-full px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  >
+                    <option value="">Select Plan</option>
+                    {plans.map((p) => {
+                      const type = p.max_members === 1 ? "Single" : p.max_members === 2 ? "Couple" : `Buddy (${p.max_members})`;
+                      return (
+                        <option key={p.id} value={p.id}>
+                          {p.name} ({type}) – ₹{p.price} / {p.duration_days} days
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+
+                {/* Upgrading Notice */}
+                {selectedPlanId && plans.find((p) => p.id === selectedPlanId)?.max_members > 1 && renewTarget.type === "single" && (
+                  <div className="bg-indigo-50 border border-indigo-200 text-indigo-800 text-xs font-medium px-4 py-3 rounded-2xl flex items-start gap-2">
+                    <span className="text-base">✨</span>
+                    <div>
+                      Converting <b>{renewTarget.data.full_name}</b> to a <b>{plans.find((p) => p.id === selectedPlanId)?.name}</b> group pack. Please fill the details for the additional member(s) below.
+                    </div>
+                  </div>
+                )}
+
+                {/* Additional Members Input Fields */}
+                {additionalMembers.map((extra, idx) => {
+                  const memberNum = renewTarget.type === "single" ? idx + 2 : (renewTarget.data.group_members?.length || 1) + idx + 1;
+                  return (
+                    <div key={idx} className="border border-indigo-100 bg-indigo-50/40 p-4 rounded-2xl space-y-3">
+                      <div className="text-xs font-bold text-indigo-700 uppercase flex items-center gap-1.5">
+                        <span>👤</span>
+                        <span>Member {memberNum} Details</span>
+                      </div>
+                      <input
+                        placeholder="Full Name"
+                        value={extra.full_name}
+                        onChange={(e) => {
+                          const updated = [...additionalMembers];
+                          updated[idx] = { ...updated[idx], full_name: e.target.value };
+                          setAdditionalMembers(updated);
+                        }}
+                        className="border bg-white px-3 py-2 rounded-xl w-full text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                      />
+                      <input
+                        placeholder="10-digit Phone Number"
+                        value={extra.phone}
+                        onChange={(e) => {
+                          const updated = [...additionalMembers];
+                          updated[idx] = { ...updated[idx], phone: e.target.value };
+                          setAdditionalMembers(updated);
+                        }}
+                        className="border bg-white px-3 py-2 rounded-xl w-full text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                      />
+                      <div>
+                        <label className="text-xs text-slate-500 block mb-1">Photo (Optional)</label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const updated = [...additionalMembers];
+                            updated[idx] = { ...updated[idx], photo: e.target.files[0] };
+                            setAdditionalMembers(updated);
+                          }}
+                          className="text-xs text-slate-500"
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+
+                <div>
+                  <label className="text-xs font-semibold text-slate-500 uppercase mb-1 block">Payment Mode</label>
+                  <select
+                    value={renewPaymentMode}
+                    onChange={(e) => setRenewPaymentMode(e.target.value)}
+                    className="border w-full px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  >
+                    <option value="cash">💵 Cash</option>
+                    <option value="upi">📱 UPI</option>
+                    <option value="card">💳 Card</option>
+                  </select>
+                </div>
+
+                {selectedPlanId && (
+                  <div className="bg-indigo-50 text-indigo-700 text-sm font-bold px-4 py-3 rounded-2xl text-center">
+                    Amount: ₹{plans.find((p) => p.id === selectedPlanId)?.price?.toLocaleString("en-IN")}
+                  </div>
+                )}
+              </div>
+
               <div className="flex gap-2">
-                <button onClick={handleRenewConfirm}
-                  className="flex-1 bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition">Confirm</button>
-                <button onClick={() => { setRenewTarget(null); setSelectedPlanId(""); setRenewPaymentMode("cash"); }}
-                  className="flex-1 bg-slate-100 text-slate-700 py-3 rounded-xl font-semibold hover:bg-slate-200 transition">Cancel</button>
+                <button
+                  onClick={handleRenewConfirm}
+                  className="flex-1 bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition"
+                >
+                  Confirm & Renew
+                </button>
+                <button
+                  onClick={() => {
+                    setRenewTarget(null);
+                    setSelectedPlanId("");
+                    setAdditionalMembers([]);
+                    setRenewPaymentMode("cash");
+                  }}
+                  className="flex-1 bg-slate-100 text-slate-700 py-3 rounded-xl font-semibold hover:bg-slate-200 transition"
+                >
+                  Cancel
+                </button>
               </div>
             </div>
           </div>
